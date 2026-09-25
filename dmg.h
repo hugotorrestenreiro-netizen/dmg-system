@@ -22,8 +22,8 @@ typedef struct
 
 typedef struct dmg
 {
-    cpu* CPU;
-    ppu* PPU;
+    cpu CPU;
+    ppu PPU;
     uint8_t memory[0x10000];
 };
 
