@@ -10,7 +10,7 @@ dmg* initiate_dmg(){
     reg8bit_map[0] = ((uint8_t*) &dmg->CPU.BC) + 1;
     reg8bit_map[1] = ((uint8_t*) &dmg->CPU.BC) + 0;
     reg8bit_map[2] = ((uint8_t*) &dmg->CPU.DE) + 1;
-    reg8bit_map[3] = ((uint8_t*) &dmg->CPU.DE) + 0;
+    reg8bit_map[3] = ((uint8_t*) &dmg->CPU.DE) + 0;    //mapping register (à changer (pipeline flush car switch))
     reg8bit_map[4] = ((uint8_t*) &dmg->CPU.HL) + 1;
     reg8bit_map[5] = ((uint8_t*) &dmg->CPU.HL) + 0;
     reg8bit_map[6] = NULL;

@@ -24,7 +24,7 @@ typedef struct
 typedef struct
 {
     cpu CPU;
-    ppu PPU;
+    ppu PPU;                            //Principal struct
     uint8_t memory[0x10000];
 }dmg;
 
