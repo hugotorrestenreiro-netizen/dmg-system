@@ -1,7 +1,8 @@
-#ifndef DMG
-#define DMG
+#ifndef DMG.h
+#define DMG.h
 
 #include <stdint.h>
+#include <stdio.h>
 
 typedef struct
 {
@@ -20,12 +21,12 @@ typedef struct
 
 
 
-typedef struct dmg
+typedef struct
 {
     cpu CPU;
     ppu PPU;
     uint8_t memory[0x10000];
-};
+}dmg;
 
 
 #endif
