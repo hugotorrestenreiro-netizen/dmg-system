@@ -12,6 +12,7 @@ typedef struct
     uint16_t HL ; // HL (High: H, Low: L)
     uint16_t SP ; // SP (stack)
     uint16_t PC ; // PC
+    uint8_t* reg8bit_map[8]; // 8bit register map
 }cpu;
 
 typedef struct
@@ -27,6 +28,8 @@ typedef struct
     ppu PPU;                            //Principal struct
     uint8_t memory[0x10000];
 }dmg;
+
+uint8_t* reg8bit_index(dmg* dmg, uint8_t input);
 
 
 #endif
