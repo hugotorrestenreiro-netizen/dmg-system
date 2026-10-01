@@ -20,15 +20,18 @@ dmg* initiate_dmg(){
     dmg->CPU.reg16bit_map[2] = &dmg->CPU.HL;
     dmg->CPU.reg16bit_map[3] = &dmg->CPU.SP;
 
-    dmg->CPU.reg16bitmem_map[0]= &dmg->CPU.BC;
-    dmg->CPU.reg16bitmem_map[1]= &dmg->CPU.DE;
-    dmg->CPU.reg16bitmem_map[2]= &dmg->CPU.HL;
-    dmg->CPU.reg16bitmem_map[3]= &dmg->CPU.HL;
-
     dmg->CPU.SP = 0xFFFE;
     dmg->CPU.PC = 0x0100;
 
     return dmg;
+}
+
+uint16_t reg16bit_mem_index(dmg* dmg,uint8_t input){
+    uint16_t* reg16map[4]= {&dmg->CPU.BC, &dmg->CPU.DE, &dmg->CPU.HL, &dmg->CPU.HL};
+    static const int8_t mov[4]= {0,0,1,-1};
+    uint16_t addr = *reg16map[input];
+    *reg16map[input] += mov[input];
+    return addr;
 }
 
 uint16_t* reg16bit_index(dmg* dmg,uint8_t input){
