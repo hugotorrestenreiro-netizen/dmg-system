@@ -14,6 +14,8 @@ typedef struct
     uint16_t PC ; // PC 
     uint8_t* reg8bit_map[8]; // 8bit register map
     uint16_t* reg16bit_map[3];
+    uint16_t* reg16bitmem_map[3];
+    uint16_t* reg16bitstk_map[3];
 }cpu;
 
 typedef struct
@@ -31,6 +33,7 @@ typedef struct
 }dmg;
 
 uint8_t* reg8bit_index(dmg* dmg, uint8_t input);
+uint16_t* reg16bit_index(dmg* dmg,uint8_t input);
 
 
 #endif
