@@ -6,13 +6,14 @@
 
 typedef struct
 {
-    uint16_t AF ;  // Accumulator & FLags (High: A, Low: Flags (bit7:z, bit6:n, bit5:h, bit4:c))
-    uint16_t BC ; // BC (High: B, Low: C)
-    uint16_t DE ; // DE (High: D, Low: E)
-    uint16_t HL ; // HL (High: H, Low: L)
+    uint16_t AF ;  // Accumulator (7) & FLags (High: A, Low: Flags (bit7:z, bit6:n, bit5:h, bit4:c))
+    uint16_t BC ; // BC (High: B (0), Low: C(1))
+    uint16_t DE ; // DE (High: D(2), Low: E(3))
+    uint16_t HL ; // HL (High: H(4), Low: L(5))
     uint16_t SP ; // SP (stack)
-    uint16_t PC ; // PC
+    uint16_t PC ; // PC 
     uint8_t* reg8bit_map[8]; // 8bit register map
+    uint16_t* reg16bit_map[3];
 }cpu;
 
 typedef struct

@@ -1,0 +1,50 @@
+By Hugo TORRES TENREIRO, étudiant en deuxieme année de Licence en INFORMATIQUE FONDAMENTALE (2026/2027) dans l'université de Bordeaux.
+//For English speakers, I might translate this devlog one day.
+//Les crédits sont à la fin.
+
+//Historiques de projets avant cela: emu Chip-8, (consultables sur mon github : "https://github.com/hugotorrestenreiro-netizen")
+
+01/10/2026:
+
+#"Préambule" (pas sûr du titre mais je laisse comme ça pour l'instant):
+Voici mon "Journal de bord" pour ce périple qu'est la mise en place de mon émulateur DMG codé en C.J'ai décidé de tenir ce devlog afin d'aider de futurs dev qui aimeraient
+réutiliser mon code, pour toute personne cherchant une explication relativement pédagogique du projet (pour apprendre des choses (on adore ça)), ou alors pour moi-même à l'avenir
+si l'envie me viens de rire du manque d'experience de mon moi passé (ou tout simplement pour suivre l'avancée de ma souffrance/raisonnement etc...).
+Je commence ceci après avoir entamé la conception de cet émulateur, même si je suis encore au début. J'expliquerai ici donc mes pensées, mes raisonnements, les corrections de
+ces mêmes raisonnements ainsi que tous mes idées afin d'architecturer ce projet au mieux. Pour ce projet je me suis aidé des PanDocs ("https://gbdev.io/pandocs/About.html")
+(travail de documentation EXCEPTIONNEL (allez voir c'est le feu)).
+
+#Architecture de base:
+
+Alors pour gérer l'architecture et la gestion des données j'ai décidé d'utiliser une grande structure "globale" que j'ai appelé dmg, dans celle ci on retrouve 3 choses :
+
+Note: cpu c'est le processeur (calculs etc) et ppu la puce graphique (affichage)
+
+-la structure cpu contenant les registres (16 bits) et deux tableau qui me servent de "carte de registre" (un pour les registres 8bit et un autre pour les 16bits),
+pour obtenir les registres 8 bit (car ici cpu ne stock que des registres 16bit), je découpe littéralement les registres en deux pour par exemple passer de BC (reg16bit)
+à B (reg8bit) ou C (reg8bit), je préfère garder ce fonctionnement pour que le fonctionnement de l'émulateur ne soit pas détruit (à cause de l'utilisation de "union") sur des
+systèmes avec des Endiannesses différents.
+
+-la structure ppu qui pour l'instant ne contient que le tableau display qui contient les données, vous l'aurez deviné, de l'écran (attention faire la différence entre
+l'écran de la machine émulée et la fenêtre qui s'affiche lorsque vous lancez la rom (pas la même chose: le tableau display est l'écran qui reçoit directement ces données 
+du cpu, et la fenêtre qui s'affiche quand à elle analyse ce fameux tableau display et avec une bibliothèque(ensemble de fonctions(ici SDL2), "traduit" l'affichage
+dans un language (en gros pour discuter avec la carte graphique) et afficher sur nos super pc modernes ces données. ))). J'ajouterai des éléments en plus au fur et à 
+mesure du développement car pour l'instant le fonctionnement du ppu me terrifie.
+
+-le tableau memory[] qui contient l'ensemble des données en mémoire de cet interpreteur (interpreteur est un autre mot pour dire emulateur).
+
+Note: SDL2 est la bibliothèque utilisée ici pour pouvoir créer une fenêtre, afficher des choses etc.
+
+Maintenant je vais expliquer les différents fichiers présents pour l'instant:
+-dmg.c toutes les fonctions qui ont à voir de près ou de loin avec le fonctionnement du processeur (partie fect decode execute par exemple)
+-instructions.c ici je code tous les opcodes (les petites instructions assembleur utilisées à l'époque par le processeur émulé), j'expliquerai par la suite comment j'ai rendu
+ça bien PROPRE (à mon humble avis).
+-main.c ici je gèrerai la boucle qui permet à l'émulateur de prendre vie (affichage SDL, cycle d'horloge du cpu et du ppu, etc).
+
+Pour l'instant très simple et risque de fonctionner comme ça mais il y a toujours de futurs potentiels candidats:
+-ppu.c gérer les cyles d'affichage sur display etc (risque de rester dans dmg.c, mais je suis pas trop sûr parceque ça risque de faire un trop gros fichier).
+-memorymap.c ici uniquement le "bus de données" pour gérer la façon dont les données sont stockées (ici modele Von Neumann (faites vos recherches parceque flemme d'expliquer ça c'est
+trop long)).Je risque également de faire tout ceci dans dmg.c mais encore une fois la même histoire, le fichier risque d'être trop "lourd" (je veux rendre ça propre, beau
+et lisible).
+
+à écrire: #instructions.
