@@ -47,4 +47,47 @@ Pour l'instant très simple et risque de fonctionner comme ça mais il y a toujo
 trop long)).Je risque également de faire tout ceci dans dmg.c mais encore une fois la même histoire, le fichier risque d'être trop "lourd" (je veux rendre ça propre, beau
 et lisible).
 
-à écrire: #instructions.
+#instructions
+
+Ici on parle de décisions d'architecture assez pointues donc j'ai préféré faire un petit résumé de connaissances en expliquant d'abord l'instruction et le concept de pipeline flush
+et de prédiction d'embranchements (partie un peu plus sérieuse même si toujours avec ton léger car c'est juste du jargon un peu technique).
+
+Résumé de connaissances:
+
+C'est quoi une instruction ? (pour ceux qui ne savent pas)
+Alors, les instructions un morceau qui peut paraître terrifiant à première vue mais, ne vous inquietez pas, une fois la logique comprise tout roule comme sur des roulettes
+(encore faut-il la comprendre). Une instruction est comme son nom l'indique une instruction qui sera donnée au cpu, cette instruction a donc un but, qui peut aller de la 
+simple addition au déplacement en mémoire de données. Elles ont chacune une valeur hexadécimale (type 0xYY) différente.
+
+Dans l'architecture dmg, les ingénieurs à l'origine du processeur (ici le Z80 à l'origine) ont fait en sorte que les instructions, une fois en binaire est une espèce de
+"préfixe" ou de "suffixe", par exemple toute instruction demandant chargement de données d'un registre 8bit à un autre sera de la forme : 01 rrr r'r'r', avec rrr et r'r'r'
+deux variable de 3bit qui permettent de "viser" l'un des registre (comme un index dans un tableau si on veut). De manière plus générale on aura cette forme: XX YYY ZZZ,
+XX sera une "catégorie", si au sein de cette catégorie il y a plus d'une instruction: on doit réussir à trouver un autre moyen de l'identifier, que ce soit avec ZZZ ou YYY,
+on peut alors cibler au sein de cette catégorie une instruction précise.
+
+Pipeline flush:
+
+Maintenant ceci expliqué nous pouvons aller au coeur du sujet. Alors, au sein d'un processeur il y a une notion clée qui est le pipeline, il s'agit d'une rangée de N valeurs
+toutes "en file indienne" qui subisse des manipulations par le processeur, dans un processeur classique on retrouve 3 étapes, fetch decode et execute.
+Maintenant, je vais rendre un sujet abstrait qui est le pipeline flush assez facile à comprendre en usant de ma superbe capacité à vulgariser: le processeur adore prévoir à l'avance,
+l'illustration même de cela est le fait que comme dit plus haut, il gère plusieurs instructions dans ce "pipeline" en même temps, donc il gère en même temps que l'instruction
+qui arrive à un temps t, deux instructions qui pour l'une arrivera a t+1 et l'autre à t+2 (on a à nouveau ce principe de fil d'attente, de fil indienne), cependant si 
+au sein du programme, on utilise un "if" ce qui se déroulera sera incertain dépendant donc du "outcome" du if, le processeur incapable de prévoir précisément peut alors se tromper
+d'instructions à faire à t+1 et t+2, si il se trompe, toute la file d'attente passe à la trappe et on perd 2 instructions qui partent dans le néant (elles ne servent plus à 
+rien car le processeur a mal prédit la suite), ce concept de prédiction de ce qu'il se déroulera plus tard par le processeur s'appelle la prédiction de branchements. Ces branchements
+sont créés par des ifs donc, et finissent par faire perdre des ressources au processeur (comme si il y avait une micro fuite sur un moteur qui ralentirait une voiture en gros).
+
+On en vient maintenant à l'architecture, j'ai donc décidé, de reprendre le format XX YYY ZZZ pour manipuler mes instructions et en gros faire des instructions "générales"
+pour qu'une seule fonction réponde au fonctionnement de plusieurs instructions assembleur, par exemple la fonction LD_r8r8, car dans le vrai matériel d'origine, toutes les combinaisons
+d'assignation de valeur de registre sont présentes (A->B, B->A, C->A, B->C, etc), donc beaucoup de travail pour pas grand chose, ici LD_r8r8 simplifie la chose en lisant les
+paramètres qui ici sont 01 rrr r'r'r' (ici on ne pourra pas retrouver uniquement les registres avec ces valeurs, c'est pourquoi j'ai fait une fonction intermédiaire qui
+permet d'interpréter ces rrr et r'r'r' (reg8bit_index())) où on peut piocher directement les registres demandés.
+Lorsque l'interpréteur doit trouver une instruction par rapport à sa valeur (héxadécimale/ binaire), dans mon dernier émulateur j'ai utiliser des if, et oui
+le diable incarné pour que la performance (prédiction de branchements et pipeline flush si vous avez bien suivi), donc j'ai décidé d'indexer les instructions 
+au sein de tableaux, pour que le processeur puisse prédire tranquillement où il va.
+
+ATTENTION: La perte de pipeline flush avec les ifs est uniquement liée au processeur hôte (donc l'objectif est que votre pc fasse mieux tourner l'émulateur), 
+c'est à dire au processeur de votre ordinateur, ici aucun pipeline n'est géré, c'est les instruction unes par unes quoi qu'il arrive.
+
+Voilà pour ce bloque un peu technique, la compréhension globale de la machine ne necessite pas de maitriser ces concepts, uniquement le concept d'instruction est important
+pour bien comprendre le tout.
