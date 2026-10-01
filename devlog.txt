@@ -89,5 +89,7 @@ au sein de tableaux, pour que le processeur puisse prédire tranquillement où i
 ATTENTION: La perte de pipeline flush avec les ifs est uniquement liée au processeur hôte (donc l'objectif est que votre pc fasse mieux tourner l'émulateur), 
 c'est à dire au processeur de votre ordinateur, ici aucun pipeline n'est géré, c'est les instruction unes par unes quoi qu'il arrive.
 
-Voilà pour ce bloque un peu technique, la compréhension globale de la machine ne necessite pas de maitriser ces concepts, uniquement le concept d'instruction est important
+Conclusion: Je chasse les ifs dans les zones qui tournent à haute fréquence, pour que vous puissiez même utiliser cet interpréteur sur une PATATE.
+
+Voilà pour ce bloc un peu technique, la compréhension globale de la machine ne necessite pas de maitriser ces concepts, uniquement le concept d'instruction est important
 pour bien comprendre le tout.
