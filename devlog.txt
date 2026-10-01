@@ -1,8 +1,8 @@
 By Hugo TORRES TENREIRO, étudiant en deuxieme année de Licence en INFORMATIQUE FONDAMENTALE (2026/2027) dans l'université de Bordeaux.
-//For English speakers, I might translate this devlog one day.
+//For English speakers, I might translate this devlog one day (or not).
 //Les crédits sont à la fin.
 
-//Historiques de projets avant cela: emu Chip-8, (consultables sur mon github : "https://github.com/hugotorrestenreiro-netizen")
+//Historiques de projets avant cela: emu Chip-8, simu planètes 2D.(consultables sur mon github : "https://github.com/hugotorrestenreiro-netizen")
 
 01/10/2026:
 
