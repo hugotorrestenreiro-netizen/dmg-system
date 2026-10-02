@@ -115,4 +115,4 @@ de poids faible (ici 0x00FF). Donc les flags sont dans le registre 8bit F qui es
 que j'ai utilisée pour mettre à jour notament le flag c lors d'une addition est notamment de mettre le résultat de l'addition dans une autre variable de taille supérieure et extraire
 le bit d'après (pour un résultat qui à la base doit être en 16bit, je récupère le résultat dans une variable 32bit et j'extrait le bit 16 (le 17 ème ducoup car on commence à
 compter à partir de 0)), donc cela permet d'observer facilement si l'addition dépasse la valeure maximale d'un entier non signé de 16bit. Donc après ça, il n'y a plus qu'à
-réinjecter les bit aux bonnes position du resitre AF.
+réinjecter les bit aux bonnes position du regitre AF.
