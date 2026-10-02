@@ -11,8 +11,8 @@ Voici mon "Journal de bord" pour ce périple qu'est la mise en place de mon ému
 réutiliser mon code, pour toute personne cherchant une explication relativement pédagogique du projet (pour apprendre des choses (on adore ça)), ou alors pour moi-même à l'avenir
 si l'envie me viens de rire du manque d'experience de mon moi passé (ou tout simplement pour suivre l'avancée de ma souffrance/raisonnement etc...).
 Je commence ceci après avoir entamé la conception de cet émulateur, même si je suis encore au début. J'expliquerai ici donc mes pensées, mes raisonnements, les corrections de
-ces mêmes raisonnements ainsi que tous mes idées afin d'architecturer ce projet au mieux. Pour ce projet je me suis aidé des PanDocs ("https://gbdev.io/pandocs/About.html")
-(travail de documentation EXCEPTIONNEL (allez voir c'est le feu)).
+ces mêmes raisonnements ainsi que tous mes idées afin d'architecturer ce projet au mieux. Pour ce projet je me suis aidé des PanDocs ("https://gbdev.io/pandocs/About.html"
+travail de documentation EXCEPTIONNEL (allez voir c'est le feu)), également la table d'opcodes de Megan Sullivan ("https://meganesulli.com/blog/game-boy-opcodes/"(INCROYABLE)).
 
 #Architecture de base:
 

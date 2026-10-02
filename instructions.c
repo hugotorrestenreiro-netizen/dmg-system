@@ -73,6 +73,40 @@ void add_hlr16(dmg* dmg){
     return;
 }
 
+void inc_r8(dmg* dmg){
+    uint8_t rr = (bus_read(dmg, dmg->CPU.PC) & 0x38) >> 3;        //inc r8 opcode: 00 rr0 100 (x= 00, y= rrr, z= 100)
+    uint8_t val = get_reg8bit_index(dmg, rr);
+    set_reg8bit_index(dmg, rr, val + 1);                           //memo: ATTENTION GERER LES FLAGS Flags: Z 0 8-bit -
+    dmg->CPU.PC++;
+    return;
+}                                                              //Je suis foutu pour les flags de ces deux fonctions :( :(
+
+void dec_r8(dmg* dmg){
+    uint8_t rr = (bus_read(dmg, dmg->CPU.PC) & 0x38) >> 3;         //inc r8 opcode: 00 rrr 101 (x= 00, y= rrr, z= 101)
+    uint8_t val = get_reg8bit_index(dmg, rr);
+    set_reg8bit_index(dmg, rr, val - 1);                           //memo: ATTENTION GERER LES FLAGS Flags: Z 0 8-bit -
+    dmg->CPU.PC++;
+    return;
+}
+
+void LD_r8imm8(dmg* dmg){
+    uint8_t rr = (bus_read(dmg, dmg->CPU.PC) & 0x38) >> 3;          //LD r8 imm8 opcode: 00 rrr 110 (x= 00, y= rrr, z= 110)
+    uint8_t imm8 = bus_read(dmg, dmg->CPU.PC + 1);
+    set_reg8bit_index(dmg, rr, imm8);
+    dmg->CPU.PC+=2;
+    return;
+}
+
+void rlca(dmg* dmg){
+    uint8_t reg_a = get_reg8bit_index(dmg, 7);
+    uint8_t bit7 = reg_a >> 7;
+    uint8_t c = bit7;
+    update_flags(dmg, 0, 0, 0, c);
+    uint8_t res = (reg_a << 1) | bit7;
+    set_reg8bit_index(dmg, 7, res);
+    dmg->CPU.PC++;
+    return;
+}
 
 //BLOCK x = 01
 
