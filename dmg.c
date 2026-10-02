@@ -6,6 +6,10 @@ dmg* initiate_dmg(){
     dmg = calloc(1,sizeof(*dmg));
     if(dmg == NULL)return NULL;
     
+    for(int i= 0; i < 64 ; i++){
+        dmg->memory_map[i] = &dmg->memory[1024 * i];
+    }
+
     dmg->CPU.reg8bit_map[0] = ((uint8_t*) &dmg->CPU.BC) + 1;
     dmg->CPU.reg8bit_map[1] = ((uint8_t*) &dmg->CPU.BC) + 0;
     dmg->CPU.reg8bit_map[2] = ((uint8_t*) &dmg->CPU.DE) + 1;
@@ -40,10 +44,10 @@ uint16_t* reg16bit_index(dmg* dmg,uint8_t input){
 
 
 uint8_t* reg8bit_index(dmg* dmg,uint8_t input){
-    if(input == 6){                //temp  value will be initialized in main while loop
-        return &dmg->memory[dmg->CPU.HL];
+    if(input == 6){ 
+        return bus_read(dmg, dmg->CPU.HL);
     }
-    return (dmg->CPU.reg8bit_map[input]); //WARNING !!!! (memo: Quand tu feras la boucle main met juste avant execute la ligne "dmg->CPU.reg8bit_map[6]=&dmg->memory[dmg->CPU.HL]")
+    return (dmg->CPU.reg8bit_map[input]);
 }
 
 // void update_flags_add8()

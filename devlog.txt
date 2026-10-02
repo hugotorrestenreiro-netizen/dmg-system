@@ -116,3 +116,25 @@ que j'ai utilisée pour mettre à jour notament le flag c lors d'une addition es
 le bit d'après (pour un résultat qui à la base doit être en 16bit, je récupère le résultat dans une variable 32bit et j'extrait le bit 16 (le 17 ème ducoup car on commence à
 compter à partir de 0)), donc cela permet d'observer facilement si l'addition dépasse la valeure maximale d'un entier non signé de 16bit. Donc après ça, il n'y a plus qu'à
 réinjecter les bit aux bonnes position du regitre AF.
+
+#bus mémoire
+
+Alors... Petit soucis de conception... Jusqu'à maintenant l'objectif était dans l'ordre de gérer les instructions, puis le comportement du cpu, utiliser les rom de test (BLARG),
+puis me charger du bus (avec le MBC(j'expliquerai de quoi il s'agit plus tard)) et du ppu, mais le problème est que les instructions manipulent des données en mémoire et que si 
+je les fait avant de m'occuper du bus, je devrais repasser sur chacune des fonctions qui interagissent avec la mémoire. Je me charge donc maintenant en priorité du bus mémoire
+pour avoir un code modulaire et m'occuper du MBC uniquement en implémentant le système à un bus "linéaire" que je vais mettre en place mainteant (en faisant comme ça,
+le MBC sera une implémentation propre au code déjà effectué, tout sera 100% compatible (en gros je gagne BEAUCOUP de temps à faire ça comme ça)).
+
+-memorymap.c rajouté :D
+
+Ok pour intégrer ça j'ai fait des trucs un peu techniques, seulement 2 fonctions et 1 tableau (très simple mais très efficace), en gros j'ai créé des fonctions intermédiaires
+qui permettent d'accéder à des endroits dans la mémoire à travers un tableau d'adresses intermédiaire (memory_map[], que j'ai ajouté à la structure dmg), qui est découpé par tranche
+de 1ko par 1ko pour retrouver précisément l'adresse recherchée (Pour que plus tard chaque index puisse pointer par exemple sur l'adresse de la banque cible dans les données de la 
+rom chargée en prévision du MBC). Donc pour l'instant le ficher memorymap.c ne contient pas grand chose car c'est surtout un moyen de gagner du temps à l'avenir, au lieu de 
+repasser sur chaque instruction qui agit en mémoire, j'aurai juste à changer cet intermédiaire.
+
+fonctions:
+- uint8_t bus_read(dmg* dmg, uint16_t addr)
+- void bus_write(dmg* dmg, uint16_t addr, value)
+
+Les instructions déjà implémentées utilisent maintenant les fonctions bus_read et bus_write pour interagir avec la mémoire.

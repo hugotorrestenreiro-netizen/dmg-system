@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include "memorymap.h"
 
 typedef struct
 {
@@ -28,6 +29,7 @@ typedef struct
     cpu CPU;
     ppu PPU;                            //Principal struct
     uint8_t memory[0x10000];
+    uint8_t* memory_map[64];
 }dmg;
 
 uint8_t* reg8bit_index(dmg* dmg, uint8_t input);

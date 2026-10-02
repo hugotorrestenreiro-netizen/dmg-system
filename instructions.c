@@ -19,7 +19,7 @@ void LD_r16imm16(dmg* dmg){
 void LD_r16mem_a(dmg* dmg){
     uint8_t rr = (dmg->memory[dmg->CPU.PC] & 0x38) >> 4;                        //LD [r16mem] a  opcode: 00 rr 0 010 (x= 00, y= rr0, zzz=010)
     uint16_t reg16addr = reg16bit_mem_index(dmg, rr);
-    dmg->memory[reg16addr] = *reg8bit_index(dmg, 7);
+    bus_write(dmg, reg16addr, *reg8bit_index(dmg, 7));
     dmg->CPU.PC ++;
     return;
 }
@@ -27,15 +27,15 @@ void LD_r16mem_a(dmg* dmg){
 void LD_a_r16mem(dmg* dmg){
     uint8_t rr = (dmg->memory[dmg->CPU.PC] & 0x38) >> 4;                        //LD a [r16mem]  opcode: 00 rr 1 010 (x= 00, y= rr1, zzz=010)
     uint16_t reg16addr = reg16bit_mem_index(dmg, rr);
-    *reg8bit_index(dmg, 7) = dmg->memory[reg16addr];
+    *reg8bit_index(dmg, 7) = bus_read(dmg, reg16addr);
     dmg->CPU.PC ++;
     return;
 }
 
 void LD_imm16mem_sp(dmg* dmg){
     uint16_t imm16 = (((dmg->memory[(dmg->CPU.PC)+2]) << 8) | dmg->memory[(dmg->CPU.PC)+1]); //LD [imm16] sp opcode: 00 001 000 (x= 00, y= 001, zzz=000)
-    dmg->memory[imm16] = (dmg->CPU.SP & 0x00FF) ;
-    dmg->memory[imm16+1] = (dmg->CPU.SP & 0xFF00) >> 8 ;
+    bus_write(dmg, imm16, (dmg->CPU.SP & 0x00FF));
+    bus_write(dmg, imm16+1, (dmg->CPU.SP & 0xFF00) >> 8);
     dmg->CPU.PC+=3;
     return;
 }
@@ -77,8 +77,8 @@ void add_hlr16(dmg* dmg){
 //BLOCK x = 01
 
 void LD_r8r8(dmg* dmg){
-    uint8_t yyy = (dmg->memory[dmg->CPU.PC] & 0x38) >> 3;
-    uint8_t zzz = (dmg->memory[dmg->CPU.PC] & 0x07);            //LD r8 r8'  opcode: 01 rrr rrr (x= 00, y= rrr, zzz= rrr)
+    uint8_t yyy = (bus_read(dmg, dmg->CPU.PC) & 0x38) >> 3;
+    uint8_t zzz = (bus_read(dmg, dmg->CPU.PC) & 0x07);            //LD r8 r8'  opcode: 01 rrr rrr (x= 00, y= rrr, zzz= rrr)
     *reg8bit_index(dmg, yyy) = *reg8bit_index(dmg, zzz);        //1 M cycle
     dmg->CPU.PC++;
     return;
