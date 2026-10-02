@@ -13,7 +13,7 @@ typedef struct
     uint16_t SP ; // SP (stack)
     uint16_t PC ; // PC 
     uint8_t* reg8bit_map[8]; // 8bit register map
-    uint16_t* reg16bit_map[3];
+    uint16_t* reg16bit_map[4];
 }cpu;
 
 typedef struct

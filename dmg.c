@@ -45,3 +45,5 @@ uint8_t* reg8bit_index(dmg* dmg,uint8_t input){
     }
     return (dmg->CPU.reg8bit_map[input]); //WARNING !!!! (memo: Quand tu feras la boucle main met juste avant execute la ligne "dmg->CPU.reg8bit_map[6]=&dmg->memory[dmg->CPU.HL]")
 }
+
+// void update_flags_add8()

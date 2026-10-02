@@ -40,6 +40,40 @@ void LD_imm16mem_sp(dmg* dmg){
     return;
 }
 
+void inc_r16(dmg* dmg){                                                //inc r16 opcode: 00 rr0 011 (x=00, y=rr0, z=011)
+    uint8_t rr = (dmg->memory[dmg->CPU.PC] & 0x38) >> 4;
+    *reg16bit_index(dmg, rr)= *reg16bit_index(dmg, rr) + 1;
+    dmg->CPU.PC++;
+    return;
+}
+
+void dec_r16(dmg* dmg){                                                //dec r16 opcode: 00 rr1 011 (x=00, y=rr1, z=011)
+    uint8_t rr = (dmg->memory[dmg->CPU.PC] & 0x38) >> 4;
+    *reg16bit_index(dmg, rr)= *reg16bit_index(dmg, rr) - 1;
+    dmg->CPU.PC++;
+    return;
+}
+
+void add_hlr16(dmg* dmg){
+    uint8_t rr = (dmg->memory[dmg->CPU.PC] & 0x38) >> 4;
+    uint16_t r16 = *reg16bit_index(dmg, rr);
+    uint32_t res = dmg->CPU.HL + r16 ;                //add hl r16 opcode: 00 rr1 001 (x= 00, y= rr1, z= 001)
+
+    //Extract flags
+    uint8_t z = (dmg->CPU.AF >> 7 ) & 1;
+    uint8_t h = (((dmg->CPU.HL & 0x0FFF) + (r16 & 0x0FFF)) >> 12) & 1;
+    uint8_t c = (res >> 16) & 1;
+
+    //Update flags 
+    dmg->CPU.AF = (dmg->CPU.AF & 0xFF00) | (z << 7) | (0 << 6) | (h<< 5) | (c << 4);
+
+    dmg->CPU.HL = (uint16_t) res;
+
+    dmg->CPU.PC++;
+    return;
+}
+
+
 //BLOCK x = 01
 
 void LD_r8r8(dmg* dmg){
