@@ -93,3 +93,28 @@ Conclusion: Je chasse les ifs dans les zones qui tournent à haute fréquence, p
 
 Voilà pour ce bloc un peu technique, la compréhension globale de la machine ne necessite pas de maitriser ces concepts, uniquement le concept d'instruction est important
 pour bien comprendre le tout.
+
+02/10/2026
+
+Bon à partir de maintenant, vu que j'ai rattrapé tout le début de ma conception (même si j'ai déjà prévu quoi faire au fur et à mesure de la conception de cet emulateur), et
+mon architecture déjà posée, nous allons ici avoir un format ou j'attaque chaque choses sur lequelles je tombes, qui me posent soucis, quelles solutions ont été trouvées et
+comment.
+
+#mise à jour de flags lors d'opérations
+
+Lors de l'implémentation de mes instructions je suis tombé sur ma première opération (add hl r16), ici j'ai commencé à utiliser quelque chose qui me faisait vraiment peur au début,
+les flags, dans l'architecture dmg on en trouve 4 :
+-z le "ZERO FLAG"
+-b le "SUBSTRACTION FLAG"
+-h le "HALF CARRY FLAG"
+-c le "CARRY FLAG"
+Alors pour faire simple, le carry flag passe à 1 lorsque un entier (non signé (unsigned)) dépasse sa valeur maximale (en 8bit il s'agit de 255, par exemple) et repasse à 0. Vous imaginez
+bien donc que lors d'opérations mathématiques, cette limite peut être franchie et qu'il faudra alors mettre à jour ces petits flags (je ne développerai pas sur l'utilité de
+chaque flags, l'important est de comprendre l'idée qu'il y a derrière le flag), ces flags en mémoire sont rangés dans le registre AF du processeur, plus précisément dans son octet
+de poids faible (ici 0xFF00, car le dmg est en Little Endian (l'octet de poid faible en premier)), les concepts d'octet de poid fort et faible ne seront pas ici développés car
+je considère que c'est potentiellement quelque chose d'acquis par quelqu'un qui est toujours là (quand même un mini résumé, c'est comment les données sont stockées par la mémoire
+en gros). Donc les flags sont dans le registre 8bit F qui est donc sous cette forme: znhc0000 (ici ducoup c'est des bits(les 4 derniers bits seront toujours égaux à 0)). La solution
+que j'ai utilisée pour mettre à jour notament le flag c lors d'une addition est notamment de mettre le résultat de l'addition dans une autre variable de taille supérieure et extraire
+le bit d'après (pour un résultat qui à la base doit être en 16bit, je récupère le résultat dans une variable 32bit et j'extrait le bit 16 (le 17 ème ducoup car on commence à
+compter à partir de 0)), donc cela permet d'observer facilement si l'addition dépasse la valeure maximale d'un entier non signé de 16bit. Donc après ça, il n'y a plus qu'à
+réinjecter les bit aux bonnes position du resitre AF.
