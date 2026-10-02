@@ -43,7 +43,7 @@ uint16_t* reg16bit_index(dmg* dmg,uint8_t input){
 }
 
 
-uint8_t* get_reg8bit_index(dmg* dmg,uint8_t input){
+uint8_t get_reg8bit_index(dmg* dmg,uint8_t input){
     if(input == 6){ 
         return bus_read(dmg, dmg->CPU.HL);
     }
