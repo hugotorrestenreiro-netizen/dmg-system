@@ -111,9 +111,7 @@ les flags, dans l'architecture dmg on en trouve 4 :
 Alors pour faire simple, le carry flag passe à 1 lorsque un entier (non signé (unsigned)) dépasse sa valeur maximale (en 8bit il s'agit de 255, par exemple) et repasse à 0. Vous imaginez
 bien donc que lors d'opérations mathématiques, cette limite peut être franchie et qu'il faudra alors mettre à jour ces petits flags (je ne développerai pas sur l'utilité de
 chaque flags, l'important est de comprendre l'idée qu'il y a derrière le flag), ces flags en mémoire sont rangés dans le registre AF du processeur, plus précisément dans son octet
-de poids faible (ici 0x00FF), les concepts d'octet de poid fort et faible ne seront pas ici développés car
-je considère que c'est potentiellement quelque chose d'acquis par quelqu'un qui est toujours là (quand même un mini résumé, c'est comment les données sont stockées par la mémoire
-en gros). Donc les flags sont dans le registre 8bit F qui est donc sous cette forme: znhc0000 (ici ducoup c'est des bits(les 4 derniers bits seront toujours égaux à 0)). La solution
+de poids faible (ici 0x00FF). Donc les flags sont dans le registre 8bit F qui est donc sous cette forme: znhc0000 (ici ducoup c'est des bits(les 4 derniers bits seront toujours égaux à 0)). La solution
 que j'ai utilisée pour mettre à jour notament le flag c lors d'une addition est notamment de mettre le résultat de l'addition dans une autre variable de taille supérieure et extraire
 le bit d'après (pour un résultat qui à la base doit être en 16bit, je récupère le résultat dans une variable 32bit et j'extrait le bit 16 (le 17 ème ducoup car on commence à
 compter à partir de 0)), donc cela permet d'observer facilement si l'addition dépasse la valeure maximale d'un entier non signé de 16bit. Donc après ça, il n'y a plus qu'à
