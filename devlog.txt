@@ -105,13 +105,13 @@ comment.
 Lors de l'implémentation de mes instructions je suis tombé sur ma première opération (add hl r16), ici j'ai commencé à utiliser quelque chose qui me faisait vraiment peur au début,
 les flags, dans l'architecture dmg on en trouve 4 :
 -z le "ZERO FLAG"
--b le "SUBSTRACTION FLAG"
+-n le "SUBSTRACTION FLAG"
 -h le "HALF CARRY FLAG"
 -c le "CARRY FLAG"
 Alors pour faire simple, le carry flag passe à 1 lorsque un entier (non signé (unsigned)) dépasse sa valeur maximale (en 8bit il s'agit de 255, par exemple) et repasse à 0. Vous imaginez
 bien donc que lors d'opérations mathématiques, cette limite peut être franchie et qu'il faudra alors mettre à jour ces petits flags (je ne développerai pas sur l'utilité de
 chaque flags, l'important est de comprendre l'idée qu'il y a derrière le flag), ces flags en mémoire sont rangés dans le registre AF du processeur, plus précisément dans son octet
-de poids faible (ici 0xFF00, car le dmg est en Little Endian (l'octet de poid faible en premier)), les concepts d'octet de poid fort et faible ne seront pas ici développés car
+de poids faible (ici 0x00FF), les concepts d'octet de poid fort et faible ne seront pas ici développés car
 je considère que c'est potentiellement quelque chose d'acquis par quelqu'un qui est toujours là (quand même un mini résumé, c'est comment les données sont stockées par la mémoire
 en gros). Donc les flags sont dans le registre 8bit F qui est donc sous cette forme: znhc0000 (ici ducoup c'est des bits(les 4 derniers bits seront toujours égaux à 0)). La solution
 que j'ai utilisée pour mettre à jour notament le flag c lors d'une addition est notamment de mettre le résultat de l'addition dans une autre variable de taille supérieure et extraire
