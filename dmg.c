@@ -43,11 +43,20 @@ uint16_t* reg16bit_index(dmg* dmg,uint8_t input){
 }
 
 
-uint8_t* reg8bit_index(dmg* dmg,uint8_t input){
+uint8_t* get_reg8bit_index(dmg* dmg,uint8_t input){
     if(input == 6){ 
         return bus_read(dmg, dmg->CPU.HL);
     }
     return (dmg->CPU.reg8bit_map[input]);
+}
+
+void set_reg8bit_index(dmg* dmg, uint8_t input, uint8_t value){
+    if(input == 6){ 
+        bus_write(dmg, dmg->CPU.HL, value);
+        return;
+    }
+    *dmg->CPU.reg8bit_map[input] = value;
+    return;
 }
 
 // void update_flags_add8()

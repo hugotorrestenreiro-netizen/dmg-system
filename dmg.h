@@ -32,7 +32,8 @@ typedef struct
     uint8_t* memory_map[64];
 }dmg;
 
-uint8_t* reg8bit_index(dmg* dmg, uint8_t input);
+uint8_t* get_reg8bit_index(dmg* dmg, uint8_t input);
+void set_reg8bit_index(dmg* dmg, uint8_t input, uint8_t value);
 uint16_t* reg16bit_index(dmg* dmg,uint8_t input);
 uint16_t reg16bit_mem_index(dmg* dmg,uint8_t input);
 
