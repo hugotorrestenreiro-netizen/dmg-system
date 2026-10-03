@@ -3,6 +3,7 @@ By Hugo TORRES TENREIRO, étudiant en deuxieme année de Licence en INFORMATIQUE
 //Les crédits sont à la fin.
 
 //Historiques de projets avant cela: emu Chip-8, simu planètes 2D.(consultables sur mon github : "https://github.com/hugotorrestenreiro-netizen")
+//Ce document necessite un minimum de connaissance en C et en manipulation binaire (filtres, décalage de bit, etc...).
 
 ##01/10/2026
 
@@ -154,3 +155,11 @@ fonctions:
 - void bus_write(dmg* dmg, uint16_t addr, value)
 
 Les instructions déjà implémentées utilisent maintenant les fonctions bus_read et bus_write pour interagir avec la mémoire.
+
+##03/10/2026
+
+#cycle d'horloge
+
+Je viens de me rendre compte dans mon code que pour l'instant j'ai complètement oublié l'implémentantion de la prise en charge du compteur de cycles cpu (qui sera extrêmement
+important plus tard pour synchroniser le cpu et le ppu (un cycle cpu = 4 cycles ppu)). Mes instructions retourneront maintenant le nombre de cycles effectuées lors de leur exécution
+(ce qui me permettra plus tard d'uniquement faire la partie execute en 1 ligne: "m_cycle = "fonction d'exectute"; dmg->CPU.cycle += m_cycle;").
