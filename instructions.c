@@ -1,6 +1,7 @@
 #include "instructions.h"
 
 //opcodes are here in binary (more confonrtable to handle)
+//if any questions about variable names, go to PanDocs: "https://gbdev.io/pandocs/About.html"
 
 //BLOCK x = 00
 
@@ -65,7 +66,7 @@ void add_hlr16(dmg* dmg){
     uint8_t c = (res >> 16) & 1;
 
     //Update flags 
-    dmg->CPU.AF = (dmg->CPU.AF & 0xFF00) | (z << 7) | (0 << 6) | (h<< 5) | (c << 4);
+    update_flags(dmg, z, 0, h, c);
 
     dmg->CPU.HL = (uint16_t) res;
 
@@ -76,15 +77,27 @@ void add_hlr16(dmg* dmg){
 void inc_r8(dmg* dmg){
     uint8_t rr = (bus_read(dmg, dmg->CPU.PC) & 0x38) >> 3;        //inc r8 opcode: 00 rr0 100 (x= 00, y= rrr, z= 100)
     uint8_t val = get_reg8bit_index(dmg, rr);
-    set_reg8bit_index(dmg, rr, val + 1);                           //memo: ATTENTION GERER LES FLAGS Flags: Z 0 8-bit -
+    uint8_t res = val + 1;
+    uint8_t c = (dmg->CPU.AF >> 4) & 1;
+    uint8_t val_4bit = (val & 0x0F);
+    val_4bit += 1;
+    uint8_t h = val_4bit >> 4;
+    uint8_t z = !res; //if res = 0, z = 1, else z = 0
+    update_flags(dmg, z, 0, h, c); 
+    set_reg8bit_index(dmg, rr, res);                           
     dmg->CPU.PC++;
     return;
-}                                                              //Je suis foutu pour les flags de ces deux fonctions :( :(
+}                                                              //Je suis foutu pour les flags de ces deux fonctions :( :(. upd: PAS DU TOUT EN FAIT LA VIE EST BELLE.
 
 void dec_r8(dmg* dmg){
     uint8_t rr = (bus_read(dmg, dmg->CPU.PC) & 0x38) >> 3;         //inc r8 opcode: 00 rrr 101 (x= 00, y= rrr, z= 101)
     uint8_t val = get_reg8bit_index(dmg, rr);
-    set_reg8bit_index(dmg, rr, val - 1);                           //memo: ATTENTION GERER LES FLAGS Flags: Z 0 8-bit -
+    uint8_t res = val - 1;
+    uint8_t c = (dmg->CPU.AF >> 4) & 1;
+    uint8_t h = !(val & 0x0F);
+    uint8_t z = !res; //if res = 0, z = 1, else z = 0
+    update_flags(dmg, z, 1, h, c); 
+    set_reg8bit_index(dmg, rr, res);                           //memo: ATTENTION GERER LES FLAGS Flags: Z 1 8-bit -
     dmg->CPU.PC++;
     return;
 }

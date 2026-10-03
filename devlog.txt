@@ -4,7 +4,7 @@ By Hugo TORRES TENREIRO, étudiant en deuxieme année de Licence en INFORMATIQUE
 
 //Historiques de projets avant cela: emu Chip-8, simu planètes 2D.(consultables sur mon github : "https://github.com/hugotorrestenreiro-netizen")
 
-01/10/2026:
+##01/10/2026
 
 #"Préambule" (pas sûr du titre mais je laisse comme ça pour l'instant):
 Voici mon "Journal de bord" pour ce périple qu'est la mise en place de mon émulateur DMG codé en C.J'ai décidé de tenir ce devlog afin d'aider de futurs dev qui aimeraient
@@ -12,7 +12,8 @@ réutiliser mon code, pour toute personne cherchant une explication relativement
 si l'envie me viens de rire du manque d'experience de mon moi passé (ou tout simplement pour suivre l'avancée de ma souffrance/raisonnement etc...).
 Je commence ceci après avoir entamé la conception de cet émulateur, même si je suis encore au début. J'expliquerai ici donc mes pensées, mes raisonnements, les corrections de
 ces mêmes raisonnements ainsi que tous mes idées afin d'architecturer ce projet au mieux. Pour ce projet je me suis aidé des PanDocs ("https://gbdev.io/pandocs/About.html"
-travail de documentation EXCEPTIONNEL (allez voir c'est le feu)), également la table d'opcodes de Megan Sullivan ("https://meganesulli.com/blog/game-boy-opcodes/"(INCROYABLE)).
+travail de documentation EXCEPTIONNEL (allez voir c'est le feu)), également la table d'opcodes de Megan Sullivan ("https://meganesulli.com/blog/game-boy-opcodes/"(INCROYABLE))
+ou une autre table d'opcode équivalente ("https://izik1.github.io/gbops/" (Tout aussi génial mais un peu moins esthétique à mon humble avis)).
 
 #Architecture de base:
 
@@ -94,7 +95,7 @@ Conclusion: Je chasse les ifs dans les zones qui tournent à haute fréquence, p
 Voilà pour ce bloc un peu technique, la compréhension globale de la machine ne necessite pas de maitriser ces concepts, uniquement le concept d'instruction est important
 pour bien comprendre le tout.
 
-02/10/2026
+##02/10/2026
 
 Bon à partir de maintenant, vu que j'ai rattrapé tout le début de ma conception (même si j'ai déjà prévu quoi faire au fur et à mesure de la conception de cet emulateur), et
 mon architecture déjà posée, nous allons ici avoir un format ou j'attaque chaque choses sur lequelles je tombes, qui me posent soucis, quelles solutions ont été trouvées et
@@ -116,6 +117,21 @@ que j'ai utilisée pour mettre à jour notament le flag c lors d'une addition es
 le bit d'après (pour un résultat qui à la base doit être en 16bit, je récupère le résultat dans une variable 32bit et j'extrait le bit 16 (le 17 ème ducoup car on commence à
 compter à partir de 0)), donc cela permet d'observer facilement si l'addition dépasse la valeure maximale d'un entier non signé de 16bit. Donc après ça, il n'y a plus qu'à
 réinjecter les bit aux bonnes position du regitre AF.
+
+(upd du ##03/10/2026)
+
+#flags-suite
+
+Alors je fais une petite appartée pour expliquer comment j'ai trouvé une bonne solution pour mettre à jour les flags que je n'ai pas encore abordé (en gros tout sauf le flag carry (c)),
+sans les ifs, j'ai trouvé une solution pour chacuns: 
+-h, le half carry, marche exactement comme carry sauf que là je découpe une valeur de 8bit en extrayant ces 4 derniers bits dans une variable à part (entier non signé 8bit),
+et je vérifie après l'opération si le bit 4 s'est allumé (vraiment même logique que le flag c).
+-n, très simple s'allume quand il y a soustraction, sinon on l'éteint
+-z, s'allume lorsque la valeur vaut 0 ,ici j'utilise l'opérateur booléen "!", sur le résultat (z = !res), donc si le résultat est différent de 0, il passe à 0 mais si c'est 0 il passe à 1.
+
+Note: Quand je parle du concepte d' "allumer" un flag, je parle juste du fait de le passer de 0 à 1 (il s'agit d'un bit donc c'est les deux seules valeurs qu'il peut prendre).
+
+J'ai également mis en place une fonctions intermédiaire update_flags qui permet de mettre à jour les flags de manière propre, fluide, jolie, magnifique et élégante (j'adore ça).
 
 #bus mémoire
 
