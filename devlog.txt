@@ -3,7 +3,8 @@ By Hugo TORRES TENREIRO, étudiant en deuxieme année de Licence en INFORMATIQUE
 //Les crédits sont à la fin.
 
 //Historiques de projets avant cela: emu Chip-8, simu planètes 2D.(consultables sur mon github : "https://github.com/hugotorrestenreiro-netizen")
-//Ce document necessite un minimum de connaissance en C et en manipulation binaire (filtres, décalage de bit, etc...).
+//Ce document necessite un minimum de connaissance en C et en manipulation binaire (filtres, décalage de bit, etc...), ce sont des connaissances relativement
+accessibles et pas trop compliquées.
 
 ##01/10/2026
 
@@ -16,6 +17,8 @@ ces mêmes raisonnements ainsi que tous mes idées afin d'architecturer ce proje
 travail de documentation EXCEPTIONNEL (allez voir c'est le feu)), également la table d'opcodes de Megan Sullivan ("https://meganesulli.com/blog/game-boy-opcodes/"(INCROYABLE))
 ou une autre table d'opcode équivalente ("https://izik1.github.io/gbops/" (Tout aussi génial mais un peu moins esthétique à mon humble avis)).
 
+Je mettrai à jour certaines anciennes sections avec des petites updates sous la forme: "(upd "date")" .
+
 #Architecture de base:
 
 Alors pour gérer l'architecture et la gestion des données j'ai décidé d'utiliser une grande structure "globale" que j'ai appelé dmg, dans celle ci on retrouve 3 choses :
@@ -25,7 +28,7 @@ Note: cpu c'est le processeur (calculs etc) et ppu la puce graphique (affichage)
 -la structure cpu contenant les registres (16 bits) et deux tableau qui me servent de "carte de registre" (un pour les registres 8bit et un autre pour les 16bits),
 pour obtenir les registres 8 bit (car ici cpu ne stock que des registres 16bit), je découpe littéralement les registres en deux pour par exemple passer de BC (reg16bit)
 à B (reg8bit) ou C (reg8bit), je préfère garder ce fonctionnement pour que le fonctionnement de l'émulateur ne soit pas détruit (à cause de l'utilisation de "union") sur des
-systèmes avec des Endiannesses différents.
+systèmes avec des Endiannesses différents.(upd 03/102026) Ajout d'un entier : cycles, qui stock un compteur de cycles cpu.
 
 -la structure ppu qui pour l'instant ne contient que le tableau display qui contient les données, vous l'aurez deviné, de l'écran (attention faire la différence entre
 l'écran de la machine émulée et la fenêtre qui s'affiche lorsque vous lancez la rom (pas la même chose: le tableau display est l'écran qui reçoit directement ces données 
@@ -162,4 +165,4 @@ Les instructions déjà implémentées utilisent maintenant les fonctions bus_re
 
 Je viens de me rendre compte dans mon code que pour l'instant j'ai complètement oublié l'implémentantion de la prise en charge du compteur de cycles cpu (qui sera extrêmement
 important plus tard pour synchroniser le cpu et le ppu (un cycle cpu = 4 cycles ppu)). Mes instructions retourneront maintenant le nombre de cycles effectuées lors de leur exécution
-(ce qui me permettra plus tard d'uniquement faire la partie execute en 1 ligne: "m_cycle = "fonction d'exectute"; dmg->CPU.cycle += m_cycle;").
+(ce qui me permettra plus tard d'uniquement faire la partie execute en 1 ligne (m_cycle = "fonction d'exectute";    dmg->CPU.cycle += m_cycle;)).

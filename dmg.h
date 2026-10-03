@@ -15,6 +15,7 @@ typedef struct
     uint16_t PC ; // PC 
     uint8_t* reg8bit_map[8]; // 8bit register map
     uint16_t* reg16bit_map[4];
+    uint32_t cycle; 
 }cpu;
 
 typedef struct
