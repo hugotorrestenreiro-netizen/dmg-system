@@ -123,6 +123,58 @@ uint8_t rlca(dmg* dmg){
     return 1;
 }
 
+uint8_t rrca(dmg* dmg){
+    uint8_t reg_a = get_reg8bit_index(dmg, 7);
+    uint8_t bit0 = reg_a & 1;
+    uint8_t c = bit0;
+    update_flags(dmg, 0, 0, 0, c);
+    uint8_t res = (reg_a >> 1) | (bit0 << 7);
+    set_reg8bit_index(dmg, 7, res);
+    dmg->CPU.PC++;
+    return 1;
+}
+
+uint8_t rla(dmg* dmg){
+    uint8_t reg_a = get_reg8bit_index(dmg, 7);
+    uint8_t c = (dmg->CPU.AF >> 4) & 1;
+    uint8_t bit7 = reg_a >> 7;
+    update_flags(dmg, 0, 0, 0, bit7);
+    uint8_t res = (reg_a << 1) | c;
+    set_reg8bit_index(dmg, 7, res);
+    dmg->CPU.PC++;
+    return 1;
+}
+
+uint8_t rra(dmg* dmg){
+    uint8_t reg_a = get_reg8bit_index(dmg, 7);
+    uint8_t bit0 = reg_a & 1;
+    uint8_t c = (dmg->CPU.AF >> 4) & 1;
+    update_flags(dmg, 0, 0, 0, bit0);
+    uint8_t res = (reg_a >> 1) | (c << 7);
+    set_reg8bit_index(dmg, 7, res);
+    dmg->CPU.PC++;
+    return 1;
+}
+
+uint8_t daa(dmg* dmg){
+    uint8_t reg_a = get_reg8bit_index(dmg, 7);
+    //Extract Flags
+    uint8_t n = (dmg->CPU.AF >> 6 ) & 1;
+    uint8_t h = (dmg->CPU.AF >> 5 ) & 1;
+    uint8_t c = (dmg->CPU.AF >> 4 ) & 1;
+    //Check if high and low nibble > 9 or flag value (half carry for low nibble and carry for high nibble)
+    uint8_t low_nib = h | (!n & ((reg_a & 0x0F) > 9));
+    uint8_t high_nib = c | (!n & (reg_a > 99));
+    //Assemble high and low nibb, apply it on reg_a
+    uint8_t BCD_filter = (high_nib * 0x60) | (low_nib * 0x06);
+    reg_a += (1-2*n) * BCD_filter; //1-2*n to check if this is an add or sub
+    //Update A Register and flags
+    set_reg8bit_index(dmg, 7, reg_a);
+    update_flags(dmg, !reg_a, 0, 0, high_nib);
+    dmg->CPU.PC ++;
+    return 1;
+}
+
 //BLOCK x = 01
 
 uint8_t LD_r8r8(dmg* dmg){
