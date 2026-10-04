@@ -113,7 +113,7 @@ uint8_t LD_r8imm8(dmg* dmg){
 }
 
 uint8_t rlca(dmg* dmg){
-    uint8_t reg_a = get_reg8bit_index(dmg, 7);
+    uint8_t reg_a = get_reg8bit_index(dmg, 7);          //rla opcode: 00 000 111 (x= 00, y= 000, z= 111)
     uint8_t bit7 = reg_a >> 7;
     uint8_t c = bit7;
     update_flags(dmg, 0, 0, 0, c);
@@ -124,7 +124,7 @@ uint8_t rlca(dmg* dmg){
 }
 
 uint8_t rrca(dmg* dmg){
-    uint8_t reg_a = get_reg8bit_index(dmg, 7);
+    uint8_t reg_a = get_reg8bit_index(dmg, 7);          //rrca opcode: 00 001 111 (x= 00, y= 001, z= 111)
     uint8_t bit0 = reg_a & 1;
     uint8_t c = bit0;
     update_flags(dmg, 0, 0, 0, c);
@@ -135,7 +135,7 @@ uint8_t rrca(dmg* dmg){
 }
 
 uint8_t rla(dmg* dmg){
-    uint8_t reg_a = get_reg8bit_index(dmg, 7);
+    uint8_t reg_a = get_reg8bit_index(dmg, 7);          //rla opcode: 00 010 111 (x= 00, y= 010, z= 111)
     uint8_t c = (dmg->CPU.AF >> 4) & 1;
     uint8_t bit7 = reg_a >> 7;
     update_flags(dmg, 0, 0, 0, bit7);
@@ -146,7 +146,7 @@ uint8_t rla(dmg* dmg){
 }
 
 uint8_t rra(dmg* dmg){
-    uint8_t reg_a = get_reg8bit_index(dmg, 7);
+    uint8_t reg_a = get_reg8bit_index(dmg, 7);          //rra opcode: 00 011 111 (x= 00, y= 011, z= 111)
     uint8_t bit0 = reg_a & 1;
     uint8_t c = (dmg->CPU.AF >> 4) & 1;
     update_flags(dmg, 0, 0, 0, bit0);
@@ -157,7 +157,7 @@ uint8_t rra(dmg* dmg){
 }
 
 uint8_t daa(dmg* dmg){
-    uint8_t reg_a = get_reg8bit_index(dmg, 7);
+    uint8_t reg_a = get_reg8bit_index(dmg, 7);          //daa opcode: 00 100 111 (x= 00, y= 100, z= 111)
     //Extract Flags
     uint8_t n = (dmg->CPU.AF >> 6 ) & 1;
     uint8_t h = (dmg->CPU.AF >> 5 ) & 1;
