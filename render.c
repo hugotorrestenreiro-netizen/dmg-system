@@ -34,3 +34,28 @@ SDL_Renderer* initiate_renderer(SDL_Window* window){
     }
     return renderer;
 }
+
+void handle_key_event(dmg* dmg, SDL_Keycode key, uint8_t state) {
+    switch (key) {
+
+        case UP_input: 
+            break; 
+        case DOWN_input: 
+            break; 
+        case LEFT_input: 
+            break; 
+        case RIGHT_input: 
+            break; 
+
+        case A_input: 
+            break; 
+        case B_input:  
+            break; 
+        case START_input: 
+            break; 
+        case SELECT_input: 
+            break;  
+
+        default: break;
+    }
+}
