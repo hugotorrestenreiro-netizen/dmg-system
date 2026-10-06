@@ -166,3 +166,36 @@ Les instructions déjà implémentées utilisent maintenant les fonctions bus_re
 Je viens de me rendre compte dans mon code que pour l'instant j'ai complètement oublié l'implémentantion de la prise en charge du compteur de cycles cpu (qui sera extrêmement
 important plus tard pour synchroniser le cpu et le ppu (un cycle cpu = 4 cycles ppu)). Mes instructions retourneront maintenant le nombre de cycles effectuées lors de leur exécution
 (ce qui me permettra plus tard d'uniquement faire la partie execute en 1 ligne (m_cycle = "fonction d'exectute";    dmg->CPU.cycle += m_cycle;)).
+
+##06/10/2026
+
+Alors, plein de belles choses se sont passées depuis ma dernière mise au point, tout d'abord je vais commencer par le principal:
+
+#render et main
+
+J'ai tout simplement récupéré le code que j'avais fait pour le chip 8 en retirant tout ce qui a un lien avec le chip 8, j'ai donc une structure
+bien solide mais pas grand chose, je devrais donc me charger du pixel buffer  (le truc dont j'avais parlé, le tableau contenant l'image qui sera
+affichée dans votre fenêtre par la suite), le fonctionnement du cpu et son cadençage par rapport au ppu, etc.
+
+#instruction daa 
+Alors attaquons une instruction qui m'a causé un méchant mal de crâne (ne vous inquietez une fois compris c'est simple), je préfère avoir une
+section dédiée à cette instruction car elle m'a demandé de comprendre son concepte pendant au moins une bonne heure de recherches.
+Que fait daa ? 
+Il s'agit tout simplement d'une correction à la fin d'un calcul pour transformer une valeur  de format binaire de base en format BCD.
+
+Qu'est ce qu'un BCD ? 
+
+Anciennement, sur certaines machines, un format de nombre a vu le jour, le BCD, il s'agit d'une valeur retranscrise en héxadécimale qui doit être
+au format suivant (ici exemple sur 1octet (8bit)): 0xYZ, avec Y et Z deux entiers allant de 0 à 9, et 0xYZ égal à la valeur décimale YZ,
+par exemple en BCD 0x42 = 42. La majeure différence avec l'héxadécimal de base (et donc le binaire), est l'absence des valeurs allant de 10
+à 15 (A, B, C, D, E et F), ce sont donc des valeurs qu'ont peut considérer comme "interdites". Pour transformer une valeur binaire basique en BCD,
+la solution est d'incrémenter chaque nibles de 6 (car il y a 6 valeurs interdites(10 à 15)), on fini donc avec une valeur au bon format.
+
+(Je me suis abstenu d'aborder le sujet des flags qui sont en lien avec le fonctionnement de cette instruction, car une fois le principe compris
+le reste n'est que la partie technique assez avancée, c'est à dire la mise en place etc (si besoin il y a des commentaires sur le code directement))
+
+#mise à jour sur l'avancée de manière générale
+Maintenant les bases posées dans render.c et main.c, je vais concentrer tous mes efforts sur instructions.c pour pouvoir déjà faire tourner le cpu
+(sans retour graphique), car je prévois spécifiquement de faire mon tableau d'instructions uniquement à partir du moment où tout les instructions
+seront prêtes afin d'indexer le tableau d'une bonne fois et d'être bien structuré (le faire à moitié à l'aveugle ce serai jouer avec le feu).
+ 

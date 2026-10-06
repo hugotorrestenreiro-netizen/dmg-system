@@ -175,6 +175,45 @@ uint8_t daa(dmg* dmg){
     return 1;
 }
 
+uint8_t cpl(dmg* dmg){
+    uint8_t a = get_reg8bit_index(dmg, 7);  //opcode: 00 101 111 (x= 00, y= 101, z=111)
+    uint8_t c = (dmg->CPU.AF >> 4 ) & 1;
+    a = 0xFF - a;
+    update_flags(dmg, !a, 1, 1, c);
+    set_reg8bit_index(dmg, 7, a);
+    dmg->CPU.PC ++;
+    return 1;
+}
+
+uint8_t scf(dmg* dmg){
+    uint8_t z = (dmg->CPU.AF >> 7 ) & 1; //opcode: 00 110 111 (x= 00, y=110, z=111)
+    update_flags(dmg, z, 0, 0, 1);
+    dmg->CPU.PC ++;
+    return 1;
+}
+
+uint8_t ccf(dmg* dmg){
+    uint8_t z = (dmg->CPU.AF >> 7 ) & 1; //opcode: 00 111 111 (x= 00, y=111, z=111)
+    uint8_t c = (dmg->CPU.AF >> 4 ) & 1;
+    update_flags(dmg, z, 0, 0, !c);
+    dmg->CPU.PC ++;
+    return 1;
+}
+
+uint8_t jr_imm8(dmg* dmg){ //opcode: 00 011 000 (x= 00, y=011, z=000)
+    uint8_t imm8 = bus_read(dmg, (dmg->CPU.PC)+1);
+    dmg->CPU.PC += imm8 +2;
+    return 3;
+}
+
+uint8_t jr_cond_imm8(dmg* dmg){ //opcode: 00 1cc 000 (x=00, y=1cc, z=000)
+    uint8_t cc = (bus_read(dmg, dmg->CPU.PC) & 0x18) >> 3;
+    //memo: créer une fonction annexe pour gérer les instructions conditionnelles (condition flags), pour terminer cette chère fonction.
+}
+
+
+
+
 //BLOCK x = 01
 
 uint8_t LD_r8r8(dmg* dmg){
