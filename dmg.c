@@ -59,4 +59,34 @@ void set_reg8bit_index(dmg* dmg, uint8_t input, uint8_t value){
     return;
 }
 
+uint8_t* load_rom(dmg* dmg, char* file_loc){
+    if(file_loc == NULL){
+        printf("file location error");
+        return NULL;
+    } 
+    char* extension;
+    extension = strrchr(file_loc , '.');
+    if(extension && strcmp(extension, ".gb") == 0){
+        FILE* file = fopen(file_loc, "rb");
+        if(file == NULL){
+            printf("fopen error");
+            return NULL;
+        }
+        fseek(file, 0, SEEK_END);
+        int size = ftell(file);
+        rewind(file);
+        uint8_t* rom_buffer = malloc(size);
+        if(rom_buffer == NULL){
+            fclose(file); 
+            printf("rom_buffer malloc error");
+            return NULL;
+        }
+        fread(rom_buffer, 1, size, file);
+        fclose(file);
+        dmg->memory_map[0] = &rom_buffer[0x0000];
+        dmg->memory_map[1] = &rom_buffer[0x4000];
+        return rom_buffer;
+    }
+    return NULL;
+}
 // void update_flags_add8()
