@@ -7,6 +7,8 @@ int main(int argc, char *argv[]){
     (void)argc;
     (void)argv;
 
+    char* file_loc = "rom/example.gb";
+
     uint32_t START ,DT = 16;
 
     SDL_Window* window = open_window();
@@ -24,7 +26,12 @@ int main(int argc, char *argv[]){
 
     SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 64, 32);
 
-    // uint8_t* rom_buffer = load_rom(dmg, file_loc);
+    uint8_t* rom_buffer = load_rom(dmg, file_loc);
+
+    if (rom_buffer == NULL) {
+        printf("Rom loading error");
+        return 1;
+    }
 
     int running = 1;
 
@@ -47,6 +54,8 @@ int main(int argc, char *argv[]){
 
         //FETCH DECODE EXECUTE
         //[...]
+
+        //ACCUMULATOR
 
 
     }

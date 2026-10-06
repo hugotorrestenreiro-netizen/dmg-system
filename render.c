@@ -9,10 +9,10 @@ SDL_Window* open_window(){
         return NULL;
     }
 
-    int screen_h = 32;
-    int screen_w = 64;
+    int screen_h = 144;
+    int screen_w = 160;
 
-    window = SDL_CreateWindow("CHIP-8 SYSTEM", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, screen_w*15, screen_h*15, SDL_WINDOW_RESIZABLE);
+    window = SDL_CreateWindow("DMG SYSTEM", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, screen_w*3, screen_h*3, SDL_WINDOW_RESIZABLE);
 
     if(!window){
         printf("Window initialization error.\n");
