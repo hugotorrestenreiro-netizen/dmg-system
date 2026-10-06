@@ -201,7 +201,7 @@ uint8_t ccf(dmg* dmg){
 }
 
 uint8_t jr_imm8(dmg* dmg){ //opcode: 00 011 000 (x= 00, y=011, z=000)
-    uint8_t imm8 = bus_read(dmg, (dmg->CPU.PC)+1);
+    uint8_t imm8 = (uint8_t)bus_read(dmg, (dmg->CPU.PC)+1);
     dmg->CPU.PC += imm8 +2;
     return 3;
 }
