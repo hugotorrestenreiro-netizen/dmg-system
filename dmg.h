@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 #include "memorymap.h"
 
 typedef struct
@@ -26,7 +27,7 @@ typedef struct
 
 
 
-typedef struct
+typedef struct dmg
 {
     cpu CPU;
     ppu PPU;                            //Principal struct

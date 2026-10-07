@@ -199,3 +199,6 @@ Maintenant les bases posées dans render.c et main.c, je vais concentrer tous me
 (sans retour graphique), car je prévois spécifiquement de faire mon tableau d'instructions uniquement à partir du moment où tout les instructions
 seront prêtes afin d'indexer le tableau d'une bonne fois et d'être bien structuré (le faire à moitié à l'aveugle ce serai jouer avec le feu).
  
+##07/10/2026
+
+#tableau d'instructions (DE LA PLUS HAUTE IMPORTANCE)

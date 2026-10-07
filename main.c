@@ -15,7 +15,6 @@ int main(int argc, char *argv[]){
     SDL_Renderer* renderer = initiate_renderer(window);
     SDL_Event event;
 
-    int running = 1;
 
     dmg* dmg;
     dmg = initiate_dmg();

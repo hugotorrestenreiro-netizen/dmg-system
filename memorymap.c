@@ -1,3 +1,4 @@
+#include "dmg.h"
 #include "memorymap.h"
 
 uint8_t bus_read(dmg* dmg, uint16_t addr){
