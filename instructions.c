@@ -201,17 +201,24 @@ uint8_t ccf(dmg* dmg){
 }
 
 uint8_t jr_imm8(dmg* dmg){ //opcode: 00 011 000 (x= 00, y=011, z=000)
-    uint8_t imm8 = (uint8_t)bus_read(dmg, (dmg->CPU.PC)+1);
+    int8_t imm8 = (int8_t)bus_read(dmg, (dmg->CPU.PC)+1);
     dmg->CPU.PC += imm8 +2;
     return 3;
 }
 
 uint8_t jr_cond_imm8(dmg* dmg){ //opcode: 00 1cc 000 (x=00, y=1cc, z=000)
     uint8_t cc = (bus_read(dmg, dmg->CPU.PC) & 0x18) >> 3;
-    //memo: créer une fonction annexe pour gérer les instructions conditionnelles (condition flags), pour terminer cette chère fonction.
+    int8_t imm8 = (int8_t)bus_read(dmg, (dmg->CPU.PC)+1);
+    uint8_t cond = check_cond(dmg, cc);
+    dmg->CPU.PC += (imm8 * cond) + 2;
+    return 2 + cond;
 }
 
-
+uint8_t stop(dmg* dmg){
+    dmg->CPU.PC += 2;
+    dmg->CPU.stop = 1;
+    return 2;
+}
 
 
 //BLOCK x = 01
