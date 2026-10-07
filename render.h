@@ -13,6 +13,8 @@
 #define START_input  SDLK_w
 #define SELECT_input SDLK_x
 
-
+SDL_Window* open_window();
+SDL_Renderer* initiate_renderer(SDL_Window* window);
+void handle_key_event(dmg* dmg, SDL_Keycode key, uint8_t state);
 
 #endif

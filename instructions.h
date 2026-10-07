@@ -15,6 +15,7 @@ uint8_t  block1_dispatch(dmg* dmg, uint8_t opcode);
 uint8_t  block2_dispatch(dmg* dmg, uint8_t opcode);
 uint8_t  block3_dispatch(dmg* dmg, uint8_t opcode);
 
+uint8_t instruction_table(dmg* dmg, uint8_t opcode);
 uint8_t x_block(dmg* dmg, uint8_t opcode, uint8_t x);
 
 uint8_t block0_dispatch_z0(dmg* dmg, uint8_t opcode);

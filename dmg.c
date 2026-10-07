@@ -83,10 +83,17 @@ uint8_t* load_rom(dmg* dmg, char* file_loc){
         }
         fread(rom_buffer, 1, size, file);
         fclose(file);
-        dmg->memory_map[0] = &rom_buffer[0x0000];
-        dmg->memory_map[1] = &rom_buffer[0x4000];
+       for (int i = 0; i < 32; i++) {
+        if (i * 1024 < size) {
+            dmg->memory_map[i] = &rom_buffer[i * 1024];
+        }
+        else {
+            dmg->memory_map[i] = &dmg->memory[i * 1024];
+            }
+        }
         return rom_buffer;
     }
     return NULL;
 }
+
 // void update_flags_add8()

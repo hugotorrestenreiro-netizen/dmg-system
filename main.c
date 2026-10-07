@@ -7,7 +7,7 @@ int main(int argc, char *argv[]){
     (void)argc;
     (void)argv;
 
-    char* file_loc = "rom/example.gb";
+    char* file_loc = "cpu_instrs.gb";
 
     uint32_t START ,DT = 16;
 
@@ -19,7 +19,7 @@ int main(int argc, char *argv[]){
     dmg* dmg;
     dmg = initiate_dmg();
 
-    if (!window || !renderer || !dmg) {
+    if (!dmg) {
     return 1;
     }
 
@@ -37,7 +37,6 @@ int main(int argc, char *argv[]){
     dmg->CPU.cycle = 0;
 
     while(running){
-
         while(SDL_PollEvent(&event)){
             //Inputs
             if(event.type == SDL_QUIT){
@@ -52,16 +51,20 @@ int main(int argc, char *argv[]){
         }
 
         //FETCH DECODE EXECUTE
-        //[...]
+        uint8_t opcode = bus_read(dmg, dmg->CPU.PC);
+        dmg->CPU.cycle += instruction_table(dmg, opcode);
 
         //ACCUMULATOR
 
 
     }
 
+    free(dmg);
+
     SDL_DestroyTexture(texture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
+
     return 0;
 }

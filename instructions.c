@@ -310,8 +310,11 @@ uint8_t block0_dispatch_z2(dmg* dmg, uint8_t opcode){
 uint8_t block0_dispatch_z3(dmg* dmg, uint8_t opcode){
     uint8_t y = (opcode & 0x38) >> 3;
     static const function_dispatch_t block0_z3_functions[8]={
-        inc_r16,
-        dec_r16
+        inc_r16, dec_r16,
+        inc_r16, dec_r16,
+        inc_r16, dec_r16,
+        inc_r16, dec_r16,
+
     };
     return block0_z3_functions[y](dmg);
 }
@@ -332,7 +335,7 @@ uint8_t block0_dispatch_z6(dmg* dmg, uint8_t opcode){
 }
 
 uint8_t block0_dispatch_z7(dmg* dmg, uint8_t opcode){
-    uint8_t y = (opcode & 0x07) >> 3;
+    uint8_t y = (opcode & 0x38) >> 3;
     static const function_dispatch_t block0_z7_functions[8]={
         rlca,
         rrca,
