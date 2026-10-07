@@ -236,3 +236,118 @@ uint8_t LD_r8r8(dmg* dmg){
 //BLOCK x = 11
 
 //0xCB
+
+//INSTRUCTION TABLE
+
+uint8_t instruction_table(dmg* dmg, uint8_t opcode){
+    uint8_t x = (opcode & 0xC0) >> 6;
+    return x_block(dmg, opcode, x);
+}
+
+uint8_t x_block(dmg* dmg, uint8_t opcode, uint8_t x){
+    static const dispatch_t x_index[4] = {
+        block0_dispatch,
+        block1_dispatch,
+        block2_dispatch,
+        block3_dispatch
+    };
+    return x_index[x](dmg, opcode);
+}
+
+uint8_t  block0_dispatch(dmg* dmg, uint8_t opcode){
+    uint8_t z = (opcode & 0x07);
+    static const dispatch_t block0_z_index[8]={
+        block0_dispatch_z0,
+        block0_dispatch_z1,
+        block0_dispatch_z2,
+        block0_dispatch_z3,
+        block0_dispatch_z4,
+        block0_dispatch_z5,
+        block0_dispatch_z6,
+        block0_dispatch_z7,
+    };
+    return block0_z_index[z](dmg,opcode);
+}
+
+uint8_t block0_dispatch_z0(dmg* dmg, uint8_t opcode){
+    uint8_t y = (opcode & 0x07) >> 3;
+    static const function_dispatch_t block0_z0_functions[8]={
+        NOP,
+        LD_imm16mem_sp,
+        stop,
+        jr_imm8,
+        jr_cond_imm8,
+        jr_cond_imm8,
+        jr_cond_imm8,
+        jr_cond_imm8
+    };
+    return block0_z0_functions[y](dmg);
+}
+
+uint8_t block0_dispatch_z1(dmg* dmg, uint8_t opcode){
+    uint8_t y = (opcode & 0x07) >> 3;
+    static const function_dispatch_t block0_z1_functions[2]={
+        LD_r16imm16,
+        add_hlr16
+    };
+    return block0_z1_functions[y](dmg);
+}
+
+uint8_t block0_dispatch_z2(dmg* dmg, uint8_t opcode){
+    uint8_t y = (opcode & 0x07) >> 3;
+    static const function_dispatch_t block0_z2_functions[2]={
+        LD_a_r16mem,
+        LD_r16mem_a
+    };
+    return block0_z2_functions[y](dmg);
+}
+
+uint8_t block0_dispatch_z3(dmg* dmg, uint8_t opcode){
+    uint8_t y = (opcode & 0x07) >> 3;
+    static const function_dispatch_t block0_z3_functions[2]={
+        inc_r16,
+        dec_r16
+    };
+    return block0_z3_functions[y](dmg);
+}
+
+uint8_t block0_dispatch_z4(dmg* dmg, uint8_t opcode){
+    return inc_r8(dmg);
+}
+
+uint8_t block0_dispatch_z5(dmg* dmg, uint8_t opcode){
+    return dec_r8(dmg);
+}
+
+uint8_t block0_dispatch_z6(dmg* dmg, uint8_t opcode){
+    return LD_r8imm8(dmg);
+}
+
+uint8_t block0_dispatch_z7(dmg* dmg, uint8_t opcode){
+    uint8_t y = (opcode & 0x07) >> 3;
+    static const function_dispatch_t block0_z7_functions[8]={
+        rlca,
+        rrca,
+        rla,
+        rra,
+        daa,
+        cpl,
+        scf,
+        ccf
+    };
+    return block0_z7_functions[y](dmg);
+}
+
+
+
+uint8_t  block1_dispatch(dmg* dmg, uint8_t opcode){
+    return 1;
+}
+
+uint8_t  block2_dispatch(dmg* dmg, uint8_t opcode){
+    return 1;
+}
+
+uint8_t  block3_dispatch(dmg* dmg, uint8_t opcode){
+    return 1;
+}

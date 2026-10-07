@@ -6,19 +6,22 @@
 #include "dmg.h"
 #include "memorymap.h"
 
-uint8_t NOP(dmg* dmg);
-uint8_t LD_r16imm16(dmg* dmg);
-uint8_t LD_r16mem_a(dmg* dmg);
-uint8_t LD_a_r16mem(dmg* dmg);
-uint8_t LD_imm16mem_sp(dmg* dmg);
-uint8_t inc_r16(dmg* dmg);
-uint8_t dec_r16(dmg* dmg);
-uint8_t add_hlr16(dmg* dmg);
-uint8_t inc_r8(dmg* dmg);
-uint8_t dec_r8(dmg* dmg);
-uint8_t LD_r8imm8(dmg* dmg);
-uint8_t rlca(dmg* dmg);
-uint8_t LD_r8r8(dmg* dmg);
+typedef uint8_t (*dispatch_t)(dmg* dmg, uint8_t opcode);
+typedef uint8_t (*function_dispatch_t)(dmg* dmg);
 
+
+uint8_t  block0_dispatch(dmg* dmg, uint8_t opcode);
+uint8_t  block1_dispatch(dmg* dmg, uint8_t opcode);
+uint8_t  block2_dispatch(dmg* dmg, uint8_t opcode);
+uint8_t  block3_dispatch(dmg* dmg, uint8_t opcode);
+
+uint8_t block0_dispatch_z0(dmg* dmg, uint8_t opcode);
+uint8_t block0_dispatch_z1(dmg* dmg, uint8_t opcode);
+uint8_t block0_dispatch_z2(dmg* dmg, uint8_t opcode);
+uint8_t block0_dispatch_z3(dmg* dmg, uint8_t opcode);
+uint8_t block0_dispatch_z4(dmg* dmg, uint8_t opcode);
+uint8_t block0_dispatch_z5(dmg* dmg, uint8_t opcode);
+uint8_t block0_dispatch_z6(dmg* dmg, uint8_t opcode);
+uint8_t block0_dispatch_z7(dmg* dmg, uint8_t opcode);
 
 #endif
