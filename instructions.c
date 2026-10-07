@@ -361,7 +361,7 @@ uint8_t block0_dispatch_z7(dmg* dmg, uint8_t opcode){
 
 uint8_t  block1_dispatch(dmg* dmg, uint8_t opcode){
     uint8_t yz = (opcode & 0x3F);
-    static const dispatch_t block0_z_index[64]={
+    static const dispatch_t block1_z_index[64]={
         LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8,
         LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8,
         LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8,
@@ -373,7 +373,7 @@ uint8_t  block1_dispatch(dmg* dmg, uint8_t opcode){
         LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, 
         LD_r8r8
     };
-    return block0_z_index[yz](dmg,opcode);
+    return block1_z_index[yz](dmg,opcode);
 }
 
 uint8_t  block2_dispatch(dmg* dmg, uint8_t opcode){
