@@ -270,7 +270,7 @@ uint8_t  block0_dispatch(dmg* dmg, uint8_t opcode){
 }
 
 uint8_t block0_dispatch_z0(dmg* dmg, uint8_t opcode){
-    uint8_t y = (opcode & 0x07) >> 3;
+    uint8_t y = (opcode & 0x38) >> 3;
     static const function_dispatch_t block0_z0_functions[8]={
         NOP,
         LD_imm16mem_sp,
@@ -285,26 +285,31 @@ uint8_t block0_dispatch_z0(dmg* dmg, uint8_t opcode){
 }
 
 uint8_t block0_dispatch_z1(dmg* dmg, uint8_t opcode){
-    uint8_t y = (opcode & 0x07) >> 3;
-    static const function_dispatch_t block0_z1_functions[2]={
-        LD_r16imm16,
-        add_hlr16
+    uint8_t y = (opcode & 0x38) >> 3;
+    static const function_dispatch_t block0_z1_functions[8]={
+        LD_r16imm16, add_hlr16,
+        LD_r16imm16, add_hlr16,
+        LD_r16imm16, add_hlr16,
+        LD_r16imm16, add_hlr16
     };
     return block0_z1_functions[y](dmg);
 }
 
 uint8_t block0_dispatch_z2(dmg* dmg, uint8_t opcode){
-    uint8_t y = (opcode & 0x07) >> 3;
-    static const function_dispatch_t block0_z2_functions[2]={
-        LD_a_r16mem,
-        LD_r16mem_a
+    uint8_t y = (opcode & 0x38) >> 3;
+    static const function_dispatch_t block0_z2_functions[8]={
+        LD_r16mem_a, LD_a_r16mem,
+        LD_r16mem_a, LD_a_r16mem,
+        LD_r16mem_a, LD_a_r16mem,
+        LD_r16mem_a, LD_a_r16mem
+        
     };
     return block0_z2_functions[y](dmg);
 }
 
 uint8_t block0_dispatch_z3(dmg* dmg, uint8_t opcode){
-    uint8_t y = (opcode & 0x07) >> 3;
-    static const function_dispatch_t block0_z3_functions[2]={
+    uint8_t y = (opcode & 0x38) >> 3;
+    static const function_dispatch_t block0_z3_functions[8]={
         inc_r16,
         dec_r16
     };
@@ -312,14 +317,17 @@ uint8_t block0_dispatch_z3(dmg* dmg, uint8_t opcode){
 }
 
 uint8_t block0_dispatch_z4(dmg* dmg, uint8_t opcode){
+    (void)opcode;
     return inc_r8(dmg);
 }
 
 uint8_t block0_dispatch_z5(dmg* dmg, uint8_t opcode){
+    (void)opcode;
     return dec_r8(dmg);
 }
 
 uint8_t block0_dispatch_z6(dmg* dmg, uint8_t opcode){
+    (void)opcode;
     return LD_r8imm8(dmg);
 }
 
