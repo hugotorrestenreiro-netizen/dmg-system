@@ -18,6 +18,7 @@ typedef struct
     uint16_t* reg16bit_map[4];
     uint32_t cycle; 
     uint8_t stop;
+    uint8_t halt;
 }cpu;
 
 typedef struct

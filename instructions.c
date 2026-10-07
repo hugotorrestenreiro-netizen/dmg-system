@@ -231,9 +231,17 @@ uint8_t LD_r8r8(dmg* dmg){
     return 1;
 }
 
-//BLOCK x = 10
+uint8_t halt(dmg* dmg){
+    dmg->CPU.halt = 1;
+    dmg->CPU.PC ++;
+    return 1;
+}
 
-//BLOCK x = 11
+//BLOCK x = 2
+
+
+
+//BLOCK x = 3
 
 //0xCB
 
@@ -352,7 +360,20 @@ uint8_t block0_dispatch_z7(dmg* dmg, uint8_t opcode){
 
 
 uint8_t  block1_dispatch(dmg* dmg, uint8_t opcode){
-    return 1;
+    uint8_t yz = (opcode & 0x3F);
+    static const dispatch_t block0_z_index[64]={
+        LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8,
+        LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8,
+        LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8,
+        LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8,
+        LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, 
+        LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, 
+        LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, 
+        LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, halt, LD_r8r8, 
+        LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, 
+        LD_r8r8
+    };
+    return block0_z_index[yz](dmg,opcode);
 }
 
 uint8_t  block2_dispatch(dmg* dmg, uint8_t opcode){
