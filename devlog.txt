@@ -202,3 +202,7 @@ seront prêtes afin d'indexer le tableau d'une bonne fois et d'être bien struct
 ##07/10/2026
 
 #tableau d'instructions (DE LA PLUS HAUTE IMPORTANCE)
+//à écrire
+
+#check conditions
+//à écrire

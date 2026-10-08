@@ -533,7 +533,18 @@ uint8_t  block1_dispatch(dmg* dmg, uint8_t opcode){
 }
 
 uint8_t  block2_dispatch(dmg* dmg, uint8_t opcode){
-    return 1;
+    uint8_t y = (opcode & 0x38) >> 3;
+    static const function_dispatch_t block2_y_functions[8]={
+        add_ar8,
+        adc_ar8,
+        sub_ar8,
+        sbc_ar8,
+        and_ar8,
+        xor_ar8,
+        or_ar8,
+        cp_ar8
+    };
+    return block2_y_functions[y](dmg);
 }
 
 uint8_t  block3_dispatch(dmg* dmg, uint8_t opcode){
