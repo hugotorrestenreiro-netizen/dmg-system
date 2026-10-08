@@ -6,9 +6,8 @@ uint8_t bus_read(dmg* dmg, uint16_t addr){
 }
 
 void bus_write(dmg* dmg, uint16_t addr, uint8_t value){
-    if(addr == 0xFF01){
-        printf("%c", value);
-        fflush(stdout);
+    if(addr < 0x8000){
+        return;
     }
     dmg->memory_map[addr>>10][addr & 0x03FF] = value;
     return;

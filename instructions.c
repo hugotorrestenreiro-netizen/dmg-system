@@ -239,7 +239,163 @@ uint8_t halt(dmg* dmg){
 
 //BLOCK x = 2
 
+uint8_t add_ar8(dmg* dmg){
+    uint8_t rr = (bus_read(dmg, dmg->CPU.PC) & 0x07);
+    uint8_t r8 = get_reg8bit_index(dmg, rr);
+    uint8_t reg_a = get_reg8bit_index(dmg, 7);
+    uint16_t res = reg_a + r8 ;                //add a r8 opcode: 10 000 rrr (x= 10, y= 000, z= rrr)
+    uint8_t reg_a_4bit = reg_a & 0x0F;
+    uint8_t r8_4bit = r8 & 0x0F;
+    uint8_t res_4bit = reg_a_4bit + r8_4bit ;
 
+    //Extract flags
+    uint8_t h = (res_4bit > 15);
+    uint8_t c = (res >> 8) & 1;
+
+    //Update flags 
+    update_flags(dmg, !((uint8_t) res), 0, h, c);
+
+    set_reg8bit_index(dmg, 7, res);
+
+    dmg->CPU.PC++;
+    return 1 + (rr==6);
+}
+
+uint8_t adc_ar8(dmg* dmg){
+    uint8_t rr = (bus_read(dmg, dmg->CPU.PC) & 0x07);
+    uint8_t r8 = get_reg8bit_index(dmg, rr);
+    uint8_t reg_a = get_reg8bit_index(dmg, 7);
+    uint8_t c_old = (dmg->CPU.AF >> 4 ) & 1;
+    uint16_t res = reg_a + r8 + c_old;                //adc a r8 opcode: 10 001 rrr (x= 00, y= 001, z= rrr)
+    uint8_t reg_a_4bit = reg_a & 0x0F;
+    uint8_t r8_4bit = r8 & 0x0F;
+    uint8_t res_4bit = reg_a_4bit + r8_4bit + c_old;
+
+    //Extract flags
+    uint8_t h = (res_4bit > 15);
+    uint8_t c_new = (res >> 8) & 1;
+
+    //Update flags 
+    update_flags(dmg, !((uint8_t) res), 0, h, c_new);
+
+    set_reg8bit_index(dmg, 7, res);
+
+    dmg->CPU.PC++;
+    return 1 + (rr==6);
+}
+
+uint8_t sub_ar8(dmg* dmg){
+    uint8_t rr = (bus_read(dmg, dmg->CPU.PC) & 0x07);
+    uint8_t r8 = get_reg8bit_index(dmg, rr);
+    uint8_t reg_a = get_reg8bit_index(dmg, 7);
+    uint16_t res = reg_a - r8 ;                //sub a r8 opcode: 10 010 rrr (x= 10, y= 010, z= rrr)
+    uint8_t reg_a_4bit = reg_a & 0x0F;
+    uint8_t r8_4bit = r8 & 0x0F;
+
+    //Extract flags
+    uint8_t h = (reg_a_4bit < r8_4bit);
+    uint8_t c = (reg_a < r8);
+
+    //Update flags 
+    update_flags(dmg, !((uint8_t) res), 1, h, c);
+
+    set_reg8bit_index(dmg, 7, res);
+
+    dmg->CPU.PC++;
+    return 1 + (rr==6);
+}
+
+uint8_t sbc_ar8(dmg* dmg){
+    uint8_t rr = (bus_read(dmg, dmg->CPU.PC) & 0x07);
+    uint8_t r8 = get_reg8bit_index(dmg, rr);
+    uint8_t c_old = (dmg->CPU.AF >> 4 ) & 1;
+    uint8_t reg_a = get_reg8bit_index(dmg, 7);
+    uint16_t res = reg_a - r8 - c_old;                //sbc a r8 opcode: 10 011 rrr (x= 10, y= 011, z= rrr)
+    uint8_t reg_a_4bit = reg_a & 0x0F;
+    uint8_t r8_4bit = r8 & 0x0F;
+
+    //Extract flags
+    uint8_t h = (reg_a_4bit < (r8_4bit + c_old));
+    uint8_t c_new = (reg_a < (r8 + c_old));
+
+    //Update flags 
+    update_flags(dmg, !((uint8_t) res), 1, h, c_new);
+
+    set_reg8bit_index(dmg, 7, res);
+
+    dmg->CPU.PC++;
+    return 1 + (rr==6);
+}
+
+uint8_t and_ar8(dmg* dmg){
+    uint8_t rr = (bus_read(dmg, dmg->CPU.PC) & 0x07);
+    uint8_t r8 = get_reg8bit_index(dmg, rr);
+    uint8_t reg_a = get_reg8bit_index(dmg, 7);
+    uint16_t res = (reg_a & r8) ;                //and a r8 opcode: 10 100 rrr (x= 10, y= 100, z= rrr)
+
+
+    //Update flags 
+    update_flags(dmg, !((uint8_t) res), 0, 1, 0);
+
+    set_reg8bit_index(dmg, 7, res);
+
+    dmg->CPU.PC++;
+
+    return 1 + (rr==6);
+}
+
+uint8_t xor_ar8(dmg* dmg){
+    uint8_t rr = (bus_read(dmg, dmg->CPU.PC) & 0x07);
+    uint8_t r8 = get_reg8bit_index(dmg, rr);
+    uint8_t reg_a = get_reg8bit_index(dmg, 7);
+    uint16_t res = (reg_a ^ r8) ;                //xor a r8 opcode: 10 101 rrr (x= 10, y= 101, z= rrr)
+
+
+    //Update flags 
+    update_flags(dmg, !((uint8_t) res), 0, 0, 0);
+
+    set_reg8bit_index(dmg, 7, res);
+
+    dmg->CPU.PC++;
+
+    return 1 + (rr==6);
+}
+
+uint8_t or_ar8(dmg* dmg){
+    uint8_t rr = (bus_read(dmg, dmg->CPU.PC) & 0x07);
+    uint8_t r8 = get_reg8bit_index(dmg, rr);
+    uint8_t reg_a = get_reg8bit_index(dmg, 7);
+    uint16_t res = (reg_a | r8) ;                //or a r8 opcode: 10 110 rrr (x= 10, y= 110, z= rrr)
+
+
+    //Update flags 
+    update_flags(dmg, !((uint8_t) res), 0, 0, 0);
+
+    set_reg8bit_index(dmg, 7, res);
+
+    dmg->CPU.PC++;
+
+    return 1 + (rr==6);
+}
+
+uint8_t cp_ar8(dmg* dmg){
+    uint8_t rr = (bus_read(dmg, dmg->CPU.PC) & 0x07);
+    uint8_t r8 = get_reg8bit_index(dmg, rr);
+    uint8_t reg_a = get_reg8bit_index(dmg, 7);
+    uint16_t res = reg_a - r8 ;                //cp a r8 opcode: 10 111 rrr (x= 10, y= 010, z= rrr)
+    uint8_t reg_a_4bit = reg_a & 0x0F;
+    uint8_t r8_4bit = r8 & 0x0F;
+
+    //Extract flags
+    uint8_t h = (reg_a_4bit < r8_4bit);
+    uint8_t c = (reg_a < r8);
+
+    //Update flags 
+    update_flags(dmg, !((uint8_t) res), 1, h, c);
+
+    dmg->CPU.PC++;
+    return 1 + (rr==6);
+}
 
 //BLOCK x = 3
 
