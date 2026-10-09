@@ -206,3 +206,6 @@ seront prêtes afin d'indexer le tableau d'une bonne fois et d'être bien struct
 
 #check conditions
 //à écrire
+
+Par simple manque d'inspiration, et après un long cassage de crâne j'estime que certaines fonctions restent meilleures avec if (notament ici l'instruction qui m'embête est un
+RET)

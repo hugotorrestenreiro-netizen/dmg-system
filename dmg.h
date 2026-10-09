@@ -17,8 +17,11 @@ typedef struct
     uint8_t* reg8bit_map[8]; // 8bit register map
     uint16_t* reg16bit_map[4];
     uint32_t cycle; 
+    //FLAGS
     uint8_t stop;
     uint8_t halt;
+    uint8_t ime;
+
 }cpu;
 
 typedef struct
