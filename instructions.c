@@ -399,6 +399,156 @@ uint8_t cp_ar8(dmg* dmg){
 
 //BLOCK x = 3
 
+uint8_t add_aimm8(dmg* dmg){
+    uint8_t imm8 = bus_read(dmg, dmg->CPU.PC + 1);
+    uint8_t reg_a = get_reg8bit_index(dmg, 7);
+    uint16_t res = reg_a + imm8 ;                //add a imm8 opcode: 11 000 110 (x= 11, y= 000, z= 110)
+    uint8_t reg_a_4bit = reg_a & 0x0F;
+    uint8_t imm8_4bit = imm8 & 0x0F;
+    uint8_t res_4bit = reg_a_4bit + imm8_4bit ;
+
+    //Extract flags
+    uint8_t h = (res_4bit > 15);
+    uint8_t c = (res >> 8) & 1;
+
+    //Update flags 
+    update_flags(dmg, !((uint8_t) res), 0, h, c);
+
+    set_reg8bit_index(dmg, 7, res);
+
+    dmg->CPU.PC += 2;
+    return 2;
+}
+
+uint8_t adc_aimm8(dmg* dmg){
+    uint8_t imm8 = bus_read(dmg, dmg->CPU.PC + 1);
+    uint8_t reg_a = get_reg8bit_index(dmg, 7);
+    uint8_t c_old = (dmg->CPU.AF >> 4 ) & 1;
+    uint16_t res = reg_a + imm8 + c_old ;                //adc a imm8 opcode: 11 001 110 (x= 11, y= 001, z= 110)
+    uint8_t reg_a_4bit = reg_a & 0x0F;
+    uint8_t imm8_4bit = imm8 & 0x0F;
+    uint8_t res_4bit = reg_a_4bit + imm8_4bit + c_old ;
+
+    //Extract flags
+    uint8_t h = (res_4bit > 15);
+    uint8_t c = (res >> 8) & 1;
+
+    //Update flags 
+    update_flags(dmg, !((uint8_t) res), 0, h, c);
+
+    set_reg8bit_index(dmg, 7, res);
+
+    dmg->CPU.PC += 2;
+    return 2;
+}
+
+uint8_t sub_aimm8(dmg* dmg){
+    uint8_t imm8 = bus_read(dmg, dmg->CPU.PC + 1);
+    uint8_t reg_a = get_reg8bit_index(dmg, 7);
+    uint16_t res = reg_a - imm8 ;                //sub a imm8 opcode: 11 010 110 (x= 11, y= 010, z= 110)
+    uint8_t reg_a_4bit = reg_a & 0x0F;
+    uint8_t imm8_4bit = imm8 & 0x0F;
+
+    //Extract flags
+    uint8_t h = (reg_a_4bit < imm8_4bit);
+    uint8_t c = (reg_a < imm8);
+
+    //Update flags 
+    update_flags(dmg, !((uint8_t) res), 1, h, c);
+
+    set_reg8bit_index(dmg, 7, res);
+
+    dmg->CPU.PC += 2;
+    return 2;
+}
+
+uint8_t sbc_aimm8(dmg* dmg){
+    uint8_t imm8 = bus_read(dmg, dmg->CPU.PC + 1);
+    uint8_t reg_a = get_reg8bit_index(dmg, 7);
+    uint8_t c_old = (dmg->CPU.AF >> 4 ) & 1;
+    uint16_t res = reg_a - imm8 - c_old ;                //sbc a imm8 opcode: 11 011 110 (x= 11, y= 011, z= 110)
+    uint8_t reg_a_4bit = reg_a & 0x0F;
+    uint8_t imm8_4bit = imm8 & 0x0F;
+
+    //Extract flags
+    uint8_t h = (reg_a_4bit < (imm8_4bit + c_old));
+    uint8_t c = (reg_a < (imm8_4bit + c_old));
+
+    //Update flags 
+    update_flags(dmg, !((uint8_t) res), 1, h, c);
+
+    set_reg8bit_index(dmg, 7, res);
+
+    dmg->CPU.PC += 2;
+    return 2;
+}
+
+uint8_t and_aimm8(dmg* dmg){
+    uint8_t imm8 = bus_read(dmg, dmg->CPU.PC + 1);
+    uint8_t reg_a = get_reg8bit_index(dmg, 7);
+    uint16_t res = (reg_a & imm8) ;                //and a imm8 opcode: 11 100 110 (x= 11, y= 100, z=110)
+
+
+    //Update flags 
+    update_flags(dmg, !((uint8_t) res), 0, 1, 0);
+
+    set_reg8bit_index(dmg, 7, res);
+
+    dmg->CPU.PC+=2;
+
+    return 2;
+}
+
+uint8_t xor_aimm8(dmg* dmg){
+    uint8_t imm8 = bus_read(dmg, dmg->CPU.PC + 1);
+    uint8_t reg_a = get_reg8bit_index(dmg, 7);
+    uint16_t res = (reg_a ^ imm8) ;                //xor a imm8 opcode: 11 101 110 (x= 11, y= 101, z=110)
+
+
+    //Update flags 
+    update_flags(dmg, !((uint8_t) res), 0, 0, 0);
+
+    set_reg8bit_index(dmg, 7, res);
+
+    dmg->CPU.PC+=2;
+
+    return 2;
+}
+
+uint8_t or_aimm8(dmg* dmg){
+    uint8_t imm8 = bus_read(dmg, dmg->CPU.PC + 1);
+    uint8_t reg_a = get_reg8bit_index(dmg, 7);
+    uint16_t res = (reg_a | imm8) ;                //or a imm8 opcode: 11 110 110 (x= 11, y= 110, z=110)
+
+
+    //Update flags 
+    update_flags(dmg, !((uint8_t) res), 0, 0, 0);
+
+    set_reg8bit_index(dmg, 7, res);
+
+    dmg->CPU.PC+=2;
+
+    return 2;
+}
+
+uint8_t cp_aimm8(dmg* dmg){
+    uint8_t imm8 = bus_read(dmg, dmg->CPU.PC + 1);
+    uint8_t reg_a = get_reg8bit_index(dmg, 7);
+    uint16_t res = reg_a - imm8 ;                //cp a imm8 opcode: 11 111 110 (x= 11, y= 111, z= 110)
+    uint8_t reg_a_4bit = reg_a & 0x0F;
+    uint8_t imm8_4bit = imm8 & 0x0F;
+
+    //Extract flags
+    uint8_t h = (reg_a_4bit < imm8_4bit);
+    uint8_t c = (reg_a < imm8);
+
+    //Update flags 
+    update_flags(dmg, !((uint8_t) res), 1, h, c);
+
+    dmg->CPU.PC += 2;
+    return 2;
+}
+
 //0xCB
 
 //INSTRUCTION TABLE
