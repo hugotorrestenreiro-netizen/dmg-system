@@ -664,6 +664,62 @@ uint8_t rst_tgt3(dmg* dmg){
     return 4;
 }
 
+uint8_t ldh_c_a(dmg* dmg){
+    uint8_t c = get_reg8bit_index(dmg,1);
+    uint16_t addr = 0xFF00 + c;
+    uint8_t a = get_reg8bit_index(dmg, 7);
+    bus_write(dmg, addr, a);
+    dmg->CPU.PC ++;
+    return 2;
+}
+
+uint8_t ldh_imm8_a(dmg* dmg){
+    uint8_t imm8 = bus_read(dmg, dmg->CPU.PC + 1);
+    uint16_t addr = 0xFF00 + imm8;
+    uint8_t a = get_reg8bit_index(dmg, 7);
+    bus_write(dmg, addr, a);
+    dmg->CPU.PC+=2;
+    return 3;
+}
+
+uint8_t ld_imm16_a(dmg* dmg){
+    uint8_t imm16_1 = bus_read(dmg, dmg->CPU.PC + 1);
+    uint8_t imm16_2 = bus_read(dmg, dmg->CPU.PC + 2);
+    uint16_t imm16 = (imm16_2 << 8) | imm16_1 ;
+    uint8_t a = get_reg8bit_index(dmg, 7);
+    bus_write(dmg, imm16, a);
+    dmg->CPU.PC+=3;
+    return 4;
+}
+
+uint8_t ldh_a_c(dmg* dmg){
+    uint8_t c = get_reg8bit_index(dmg,1);
+    uint16_t addr = 0xFF00 + c;
+    uint8_t val_addr = bus_read(dmg, addr);
+    set_reg8bit_index(dmg, 7, val_addr);
+    dmg->CPU.PC ++;
+    return 2;
+}
+
+uint8_t ldh_a_imm8(dmg* dmg){
+    uint8_t imm8 = bus_read(dmg, dmg->CPU.PC + 1);
+    uint16_t addr = 0xFF00 + imm8;
+    uint8_t val_addr = bus_read(dmg, addr);
+    set_reg8bit_index(dmg, 7, val_addr);
+    dmg->CPU.PC += 2;
+    return 3;
+}
+
+uint8_t ld_a_imm16(dmg* dmg){
+    uint8_t imm16_1 = bus_read(dmg, dmg->CPU.PC + 1);
+    uint8_t imm16_2 = bus_read(dmg, dmg->CPU.PC + 2);
+    uint16_t imm16 = (imm16_2 << 8) | imm16_1 ;
+    uint8_t val_imm16 = bus_read(dmg, imm16);
+    set_reg8bit_index(dmg, 7, val_imm16);
+    dmg->CPU.PC += 3;
+    return 4;
+}
+
 //0xCB
 
 //INSTRUCTION TABLE
