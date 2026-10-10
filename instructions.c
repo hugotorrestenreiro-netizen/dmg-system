@@ -664,6 +664,38 @@ uint8_t rst_tgt3(dmg* dmg){
     return 4;
 }
 
+uint8_t pop_reg16stk(dmg* dmg){
+    uint8_t rr = (bus_read(dmg, dmg->CPU.PC) & 0x38) >> 4;
+    
+    uint8_t sp_1 = bus_read(dmg, dmg->CPU.SP);
+    uint8_t sp_2 = bus_read(dmg, dmg->CPU.SP+1);
+    static const uint16_t mask[4]= {0xFFFF, 0xFFFF, 0xFFFF, 0xFFF0};
+    uint16_t* reg16stk = reg16stk_index(dmg, rr);
+    uint16_t sp_value = (sp_2 << 8)| sp_1;
+
+    *reg16stk = (sp_value & mask[rr]);
+    dmg->CPU.PC ++;
+    dmg->CPU.SP += 2 ;
+    return 3;
+}
+
+uint8_t push_reg16stk(dmg* dmg){
+    uint8_t rr = (bus_read(dmg, dmg->CPU.PC) & 0x38) >> 4;
+    uint16_t* reg16stk = reg16stk_index(dmg, rr);
+    uint8_t reg16stk_1 = *reg16stk >> 8;
+    uint8_t reg16stk_2 = *reg16stk & 0x00FF;
+    
+    dmg->CPU.SP -= 2 ;
+
+    bus_write(dmg, dmg->CPU.SP, reg16stk_2);
+    bus_write(dmg, dmg->CPU.SP+1, reg16stk_1);
+    
+    dmg->CPU.PC ++;
+
+    return 4;
+}
+
+
 uint8_t ldh_c_a(dmg* dmg){
     uint8_t c = get_reg8bit_index(dmg,1);
     uint16_t addr = 0xFF00 + c;
