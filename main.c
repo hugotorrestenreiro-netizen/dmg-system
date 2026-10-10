@@ -36,6 +36,8 @@ int main(int argc, char *argv[]){
 
     dmg->CPU.cycle = 0;
 
+    uint16_t cycle;
+
     while(running){
         while(SDL_PollEvent(&event)){
             //Inputs
@@ -52,7 +54,8 @@ int main(int argc, char *argv[]){
 
         //FETCH DECODE EXECUTE
         uint8_t opcode = bus_read(dmg, dmg->CPU.PC);
-        dmg->CPU.cycle += instruction_table(dmg, opcode);
+        cycle = instruction_table(dmg, opcode);
+        dmg->CPU.cycle += cycle;
 
         //ACCUMULATOR
 

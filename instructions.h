@@ -1,5 +1,5 @@
-#ifndef INSTRUCTIONS
-#define INSTRUCTIONS
+#ifndef INSTRUCTIONS_H
+#define INSTRUCTIONS_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,5 +26,19 @@ uint8_t block0_dispatch_z4(dmg* dmg, uint8_t opcode);
 uint8_t block0_dispatch_z5(dmg* dmg, uint8_t opcode);
 uint8_t block0_dispatch_z6(dmg* dmg, uint8_t opcode);
 uint8_t block0_dispatch_z7(dmg* dmg, uint8_t opcode);
+
+uint8_t block3_z3_dispatch_y0(dmg* dmg, uint8_t opcode);
+uint8_t block3_z3_dispatch_y1(dmg* dmg, uint8_t opcode);
+uint8_t block3_z3_dispatch_y2(dmg* dmg, uint8_t opcode);
+uint8_t block3_z3_dispatch_y3(dmg* dmg, uint8_t opcode);
+uint8_t block3_z3_dispatch_y4(dmg* dmg, uint8_t opcode);
+uint8_t block3_z3_dispatch_y5(dmg* dmg, uint8_t opcode);
+uint8_t block3_z3_dispatch_y6(dmg* dmg, uint8_t opcode);
+uint8_t block3_z3_dispatch_y7(dmg* dmg, uint8_t opcode);
+
+uint8_t block3_CB_dispatch_x0(dmg* dmg, uint8_t opcode);
+uint8_t block3_CB_dispatch_x1(dmg* dmg, uint8_t opcode);
+uint8_t block3_CB_dispatch_x2(dmg* dmg, uint8_t opcode);
+uint8_t block3_CB_dispatch_x3(dmg* dmg, uint8_t opcode);
 
 #endif

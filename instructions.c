@@ -248,7 +248,6 @@ uint8_t add_ar8(dmg* dmg){
     uint8_t r8_4bit = r8 & 0x0F;
     uint8_t res_4bit = reg_a_4bit + r8_4bit ;
 
-    //Extract flags
     uint8_t h = (res_4bit > 15);
     uint8_t c = (res >> 8) & 1;
 
@@ -271,7 +270,6 @@ uint8_t adc_ar8(dmg* dmg){
     uint8_t r8_4bit = r8 & 0x0F;
     uint8_t res_4bit = reg_a_4bit + r8_4bit + c_old;
 
-    //Extract flags
     uint8_t h = (res_4bit > 15);
     uint8_t c_new = (res >> 8) & 1;
 
@@ -292,7 +290,6 @@ uint8_t sub_ar8(dmg* dmg){
     uint8_t reg_a_4bit = reg_a & 0x0F;
     uint8_t r8_4bit = r8 & 0x0F;
 
-    //Extract flags
     uint8_t h = (reg_a_4bit < r8_4bit);
     uint8_t c = (reg_a < r8);
 
@@ -314,7 +311,6 @@ uint8_t sbc_ar8(dmg* dmg){
     uint8_t reg_a_4bit = reg_a & 0x0F;
     uint8_t r8_4bit = r8 & 0x0F;
 
-    //Extract flags
     uint8_t h = (reg_a_4bit < (r8_4bit + c_old));
     uint8_t c_new = (reg_a < (r8 + c_old));
 
@@ -386,7 +382,6 @@ uint8_t cp_ar8(dmg* dmg){
     uint8_t reg_a_4bit = reg_a & 0x0F;
     uint8_t r8_4bit = r8 & 0x0F;
 
-    //Extract flags
     uint8_t h = (reg_a_4bit < r8_4bit);
     uint8_t c = (reg_a < r8);
 
@@ -407,7 +402,6 @@ uint8_t add_aimm8(dmg* dmg){
     uint8_t imm8_4bit = imm8 & 0x0F;
     uint8_t res_4bit = reg_a_4bit + imm8_4bit ;
 
-    //Extract flags
     uint8_t h = (res_4bit > 15);
     uint8_t c = (res >> 8) & 1;
 
@@ -429,7 +423,6 @@ uint8_t adc_aimm8(dmg* dmg){
     uint8_t imm8_4bit = imm8 & 0x0F;
     uint8_t res_4bit = reg_a_4bit + imm8_4bit + c_old ;
 
-    //Extract flags
     uint8_t h = (res_4bit > 15);
     uint8_t c = (res >> 8) & 1;
 
@@ -449,7 +442,6 @@ uint8_t sub_aimm8(dmg* dmg){
     uint8_t reg_a_4bit = reg_a & 0x0F;
     uint8_t imm8_4bit = imm8 & 0x0F;
 
-    //Extract flags
     uint8_t h = (reg_a_4bit < imm8_4bit);
     uint8_t c = (reg_a < imm8);
 
@@ -470,7 +462,6 @@ uint8_t sbc_aimm8(dmg* dmg){
     uint8_t reg_a_4bit = reg_a & 0x0F;
     uint8_t imm8_4bit = imm8 & 0x0F;
 
-    //Extract flags
     uint8_t h = (reg_a_4bit < (imm8_4bit + c_old));
     uint8_t c = (reg_a < (imm8_4bit + c_old));
 
@@ -538,7 +529,6 @@ uint8_t cp_aimm8(dmg* dmg){
     uint8_t reg_a_4bit = reg_a & 0x0F;
     uint8_t imm8_4bit = imm8 & 0x0F;
 
-    //Extract flags
     uint8_t h = (reg_a_4bit < imm8_4bit);
     uint8_t c = (reg_a < imm8);
 
@@ -760,7 +750,6 @@ uint8_t add_spimm8(dmg* dmg){
     uint16_t reg_sp = dmg->CPU.SP;
     uint16_t res = reg_sp + signed_imm8 ;
 
-    //Extract flags
     uint8_t h = ((reg_sp & 0x0F) + (imm8 & 0x0F)) > 0x0F;
     uint8_t c = ((reg_sp & 0xFF) + (imm8 & 0xFF)) > 0xFF;
 
@@ -780,7 +769,6 @@ uint8_t ld_hl_spimm8(dmg* dmg){
     uint16_t reg_sp = dmg->CPU.SP;
     uint16_t res = reg_sp + signed_imm8 ;
 
-    //Extract flags
     uint8_t h = ((reg_sp & 0x0F) + (imm8 & 0x0F)) > 0x0F;
     uint8_t c = ((reg_sp & 0xFF) + (imm8 & 0xFF)) > 0xFF;
 
@@ -815,7 +803,158 @@ uint8_t ei(dmg* dmg){
 
 //0xCB
 
-//INSTRUCTION TABLE
+uint8_t rlc_r8(dmg* dmg){
+    uint8_t rrr = ((bus_read(dmg, dmg->CPU.PC+1)) & 0x07);
+    uint8_t reg = get_reg8bit_index(dmg, rrr);
+    uint8_t bit7 = reg >> 7;
+    uint8_t c = bit7;
+    uint8_t res = (reg << 1) | bit7;
+
+    update_flags(dmg, !res, 0, 0, c);
+    set_reg8bit_index(dmg, rrr, res);
+
+    dmg->CPU.PC+=2;
+    return ((rrr == 6) * 2) + 2;
+}
+
+uint8_t rrc_r8(dmg* dmg){
+    uint8_t rrr = ((bus_read(dmg, dmg->CPU.PC+1)) & 0x07);
+    uint8_t reg = get_reg8bit_index(dmg, rrr);
+    uint8_t bit0 = reg & 1;
+    uint8_t c = bit0;
+    uint8_t res = (reg >> 1) | (bit0 << 7);
+
+    update_flags(dmg, !res, 0, 0, c);
+    set_reg8bit_index(dmg, rrr, res);
+
+    dmg->CPU.PC+=2;
+    return ((rrr == 6) * 2) + 2;
+}
+
+uint8_t rl_r8(dmg* dmg){
+    uint8_t rrr = ((bus_read(dmg, dmg->CPU.PC+1)) & 0x07);
+    uint8_t reg = get_reg8bit_index(dmg, rrr);
+    uint8_t c = (dmg->CPU.AF >> 4) & 1;
+    uint8_t bit7 = reg >> 7;
+    uint8_t res = (reg << 1) | c;
+
+    update_flags(dmg, !res , 0, 0, bit7);
+    set_reg8bit_index(dmg, rrr, res);
+
+    dmg->CPU.PC+=2;
+    return ((rrr == 6) * 2) + 2;
+}
+
+uint8_t rr_r8(dmg* dmg){
+    uint8_t rrr = ((bus_read(dmg, dmg->CPU.PC+1)) & 0x07);
+    uint8_t reg = get_reg8bit_index(dmg, rrr);
+    uint8_t bit0 = reg & 1;
+    uint8_t c = (dmg->CPU.AF >> 4) & 1;
+    uint8_t res = (reg >> 1) | (c << 7);
+
+    update_flags(dmg, !res , 0, 0, bit0);
+    set_reg8bit_index(dmg, rrr, res);
+
+    dmg->CPU.PC+=2;
+    return ((rrr == 6) * 2) + 2;
+}
+
+uint8_t sla_r8(dmg* dmg){
+    uint8_t rrr = ((bus_read(dmg, dmg->CPU.PC+1)) & 0x07);
+    uint8_t reg = get_reg8bit_index(dmg, rrr);
+    uint8_t bit7 = reg >> 7;
+    uint8_t c = bit7;
+    uint8_t res = (reg << 1);
+
+    update_flags(dmg, !res, 0, 0, c);
+    set_reg8bit_index(dmg, rrr, res);
+
+    dmg->CPU.PC+=2;
+    return ((rrr == 6) * 2) + 2;
+}
+
+uint8_t sra_r8(dmg* dmg){
+    uint8_t rrr = ((bus_read(dmg, dmg->CPU.PC+1)) & 0x07);
+    uint8_t reg = get_reg8bit_index(dmg, rrr);
+    uint8_t bit0 = reg & 1;
+    uint8_t c = bit0;
+
+    uint8_t res = (reg >> 1) | (reg & 0x80);
+    update_flags(dmg, !res, 0, 0, c);
+    set_reg8bit_index(dmg, rrr, res);
+
+    dmg->CPU.PC+=2;
+    return ((rrr == 6) * 2) + 2;
+}
+
+uint8_t swap_r8(dmg* dmg){
+    uint8_t rrr = ((bus_read(dmg, dmg->CPU.PC+1)) & 0x07);
+    uint8_t reg = get_reg8bit_index(dmg, rrr);
+    uint8_t res = (reg >> 4) | (reg << 4);
+
+    update_flags(dmg, !res, 0, 0, 0);
+    set_reg8bit_index(dmg, rrr, res);
+
+    dmg->CPU.PC+=2;
+    return ((rrr == 6) * 2) + 2;
+}
+
+uint8_t srl_r8(dmg* dmg){
+    uint8_t rrr = ((bus_read(dmg, dmg->CPU.PC+1)) & 0x07);
+    uint8_t reg = get_reg8bit_index(dmg, rrr);
+
+    uint8_t bit0 = reg & 1;
+    uint8_t c = bit0;
+    uint8_t res = (reg >> 1);
+
+    update_flags(dmg, !res, 0, 0, c);
+    set_reg8bit_index(dmg, rrr, res);
+    dmg->CPU.PC+=2;
+    return ((rrr == 6) * 2) + 2;
+}
+
+uint8_t bit_br8(dmg* dmg){
+    uint8_t rrr = ((bus_read(dmg, dmg->CPU.PC+1)) & 0x07);
+    uint8_t reg = get_reg8bit_index(dmg, rrr);
+
+    uint8_t b = (bus_read(dmg, dmg->CPU.PC+1) & 0x38) >> 3;
+    uint8_t c = (dmg->CPU.AF >> 4 ) & 1;
+    uint8_t bit = reg & (1 << b);
+
+    update_flags(dmg, !bit, 0, 1, c);
+    dmg->CPU.PC+=2;
+    return (rrr == 6) + 2;
+}
+
+uint8_t res_br8(dmg* dmg){
+    uint8_t rrr = ((bus_read(dmg, dmg->CPU.PC+1)) & 0x07);
+    uint8_t reg = get_reg8bit_index(dmg, rrr);
+
+    uint8_t b = (bus_read(dmg, dmg->CPU.PC+1) & 0x38) >> 3;
+
+    uint8_t res = reg & ~(1 << b);
+    set_reg8bit_index(dmg, rrr, res);
+
+    dmg->CPU.PC+=2;
+    return ((rrr == 6) * 2) + 2;
+}
+
+uint8_t set_br8(dmg* dmg){
+    uint8_t rrr = ((bus_read(dmg, dmg->CPU.PC+1)) & 0x07);
+    uint8_t reg = get_reg8bit_index(dmg, rrr);
+
+    uint8_t b = (bus_read(dmg, dmg->CPU.PC+1) & 0x38) >> 3;
+
+    uint8_t res = reg | (1 << b);
+    set_reg8bit_index(dmg, rrr, res);
+
+    dmg->CPU.PC+=2;
+    return ((rrr == 6) * 2) + 2;
+}
+
+//          INSTRUCTION TABLE
+
+//      BASE AND X BLOCK IDENTIFIER
 
 uint8_t instruction_table(dmg* dmg, uint8_t opcode){
     uint8_t x = (opcode & 0xC0) >> 6;
@@ -831,6 +970,8 @@ uint8_t x_block(dmg* dmg, uint8_t opcode, uint8_t x){
     };
     return x_index[x](dmg, opcode);
 }
+
+//      BLOCK 0
 
 uint8_t  block0_dispatch(dmg* dmg, uint8_t opcode){
     uint8_t z = (opcode & 0x07);
@@ -927,7 +1068,7 @@ uint8_t block0_dispatch_z7(dmg* dmg, uint8_t opcode){
     return block0_z7_functions[y](dmg);
 }
 
-
+//      BLOCK 1
 
 uint8_t  block1_dispatch(dmg* dmg, uint8_t opcode){
     uint8_t yz = (opcode & 0x3F);
@@ -946,6 +1087,8 @@ uint8_t  block1_dispatch(dmg* dmg, uint8_t opcode){
     return block1_z_index[yz](dmg,opcode);
 }
 
+//      BLOCK 2
+
 uint8_t  block2_dispatch(dmg* dmg, uint8_t opcode){
     uint8_t y = (opcode & 0x38) >> 3;
     static const function_dispatch_t block2_y_functions[8]={
@@ -961,6 +1104,206 @@ uint8_t  block2_dispatch(dmg* dmg, uint8_t opcode){
     return block2_y_functions[y](dmg);
 }
 
+//      BLOCK 3 (with 0xCB)
+
 uint8_t  block3_dispatch(dmg* dmg, uint8_t opcode){
-    return 1;
+    uint8_t z = (opcode & 0x07);
+    static const dispatch_t block3_z_index[8]={
+        block3_dispatch_z0,
+        block3_dispatch_z1,
+        block3_dispatch_z2,
+        block3_dispatch_z3,
+        block3_dispatch_z4,
+        block3_dispatch_z5,
+        block3_dispatch_z6,
+        block3_dispatch_z7,
+    };
+    return block3_z_index[z](dmg,opcode);
+}
+
+uint8_t block3_dispatch_z0(dmg* dmg, uint8_t opcode){
+    uint8_t y = (opcode & 0x38) >> 3;
+    static const function_dispatch_t block3_z0_functions[8]={
+        ret_cond,
+        ret_cond,
+        ret_cond,
+        ret_cond,
+        ldh_imm8_a,
+        add_spimm8,
+        ldh_a_imm8,
+        ld_hl_spimm8,
+    };
+    return block3_z0_functions[y](dmg);
+}
+
+uint8_t block3_dispatch_z1(dmg* dmg, uint8_t opcode){
+    uint8_t y = (opcode & 0x38) >> 3;
+    static const function_dispatch_t block3_z1_functions[8]={
+        pop_reg16stk,
+        ret,
+        pop_reg16stk,
+        reti,
+        pop_reg16stk,
+        jp_hl,
+        pop_reg16stk,
+        ld_sphl
+    };
+    return block3_z1_functions[y](dmg);
+}
+
+uint8_t block3_dispatch_z2(dmg* dmg, uint8_t opcode){
+    uint8_t y = (opcode & 0x38) >> 3;
+    static const function_dispatch_t block3_z2_functions[8]={
+        jp_cond_imm16,
+        jp_cond_imm16,
+        jp_cond_imm16,
+        jp_cond_imm16,
+        ldh_c_a,
+        ld_imm16_a,
+        ldh_a_c,
+        ld_a_imm16
+    };
+    return block3_z2_functions[y](dmg);
+}
+
+uint8_t block3_dispatch_z3(dmg* dmg, uint8_t opcode){
+    uint8_t y = (opcode & 0x38) >> 3;
+    static const dispatch_t block3_z3_functions[8]={
+        block3_z3_dispatch_y0,
+        block3_z3_dispatch_y1,
+        block3_z3_dispatch_y2,
+        block3_z3_dispatch_y3,
+        block3_z3_dispatch_y4,
+        block3_z3_dispatch_y5,
+        block3_z3_dispatch_y6,
+        block3_z3_dispatch_y7
+    };
+    return block3_z3_functions[y](dmg, opcode);
+}
+
+uint8_t block3_z3_dispatch_y0(dmg* dmg, uint8_t opcode){
+    (void) opcode;
+    return jp_imm16(dmg);
+}
+
+uint8_t block3_z3_dispatch_y1(dmg* dmg, uint8_t opcode){
+    uint8_t new_opcode = bus_read(dmg, dmg->CPU.PC + 1);
+    uint8_t x = (new_opcode & 0xC0) >> 6;
+    static const dispatch_t CB_x_dispatch[4]={
+        block3_CB_dispatch_x0,
+        block3_CB_dispatch_x1,
+        block3_CB_dispatch_x2,
+        block3_CB_dispatch_x3
+    };
+    return CB_x_dispatch[x](dmg, new_opcode);
+}
+
+uint8_t block3_CB_dispatch_x0(dmg* dmg, uint8_t opcode){
+    uint8_t y = (opcode & 0x38) >> 3;
+    static const function_dispatch_t block3_CB_x0_functions[8]={
+        rlc_r8,
+        rrc_r8,
+        rl_r8,
+        rr_r8,
+        sla_r8,
+        sra_r8,
+        swap_r8,
+        srl_r8
+    };
+    return block3_CB_x0_functions[y](dmg);
+}
+
+uint8_t block3_CB_dispatch_x1(dmg* dmg, uint8_t opcode){
+    (void) opcode;
+    return bit_br8(dmg);
+}
+
+uint8_t block3_CB_dispatch_x2(dmg* dmg, uint8_t opcode){
+    (void) opcode;
+    return res_br8(dmg);
+}
+
+uint8_t block3_CB_dispatch_x3(dmg* dmg, uint8_t opcode){
+    (void) opcode;
+    return set_br8(dmg);
+}
+
+uint8_t block3_z3_dispatch_y2(dmg* dmg, uint8_t opcode){
+    (void) opcode;
+    return NOP(dmg);
+}
+
+uint8_t block3_z3_dispatch_y3(dmg* dmg, uint8_t opcode){
+    (void) opcode;
+    return NOP(dmg);
+}
+
+uint8_t block3_z3_dispatch_y4(dmg* dmg, uint8_t opcode){
+    (void) opcode;
+    return NOP(dmg);
+}
+
+uint8_t block3_z3_dispatch_y5(dmg* dmg, uint8_t opcode){
+    (void) opcode;
+    return NOP(dmg);
+}
+
+uint8_t block3_z3_dispatch_y6(dmg* dmg, uint8_t opcode){
+    (void) opcode;
+    return di(dmg);
+}
+
+uint8_t block3_z3_dispatch_y7(dmg* dmg, uint8_t opcode){
+    (void) opcode;
+    return ei(dmg);
+}
+
+uint8_t block3_dispatch_z4(dmg* dmg, uint8_t opcode){
+    uint8_t y = (opcode & 0x38) >> 3;
+    static const function_dispatch_t block3_z4_functions[8]={
+        call_cond_imm16,
+        call_cond_imm16,
+        call_cond_imm16,
+        call_cond_imm16,
+        NOP,
+        NOP,
+        NOP,
+        NOP
+    };
+    return block3_z4_functions[y](dmg);
+}
+
+uint8_t block3_dispatch_z5(dmg* dmg, uint8_t opcode){
+    uint8_t y = (opcode & 0x38) >> 3;
+    static const function_dispatch_t block3_z5_functions[8]={
+        push_reg16stk,
+        call_imm16,
+        push_reg16stk,
+        NOP,
+        push_reg16stk,
+        NOP,
+        push_reg16stk,
+        NOP
+    };
+    return block3_z5_functions[y](dmg);
+}
+
+uint8_t block3_dispatch_z6(dmg* dmg, uint8_t opcode){
+    uint8_t y = (opcode & 0x38) >> 3;
+    static const function_dispatch_t block3_z6_functions[8]={
+        add_aimm8,
+        adc_aimm8,
+        sub_aimm8,
+        sbc_aimm8,
+        and_aimm8,
+        xor_aimm8,
+        or_aimm8,
+        cp_aimm8
+    };
+    return block3_z6_functions[y](dmg);
+}
+
+uint8_t block3_dispatch_z7(dmg* dmg, uint8_t opcode){
+    (void) opcode;
+    return rst_tgt3(dmg);
 }
