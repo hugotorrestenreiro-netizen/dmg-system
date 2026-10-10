@@ -689,11 +689,12 @@ uint8_t push_reg16stk(dmg* dmg){
 
     bus_write(dmg, dmg->CPU.SP, reg16stk_2);
     bus_write(dmg, dmg->CPU.SP+1, reg16stk_1);
-    
+
     dmg->CPU.PC ++;
 
     return 4;
 }
+
 
 
 uint8_t ldh_c_a(dmg* dmg){
@@ -750,6 +751,66 @@ uint8_t ld_a_imm16(dmg* dmg){
     set_reg8bit_index(dmg, 7, val_imm16);
     dmg->CPU.PC += 3;
     return 4;
+}
+
+
+uint8_t add_spimm8(dmg* dmg){
+    uint8_t imm8 = bus_read(dmg, dmg->CPU.PC + 1);
+    int8_t signed_imm8 = (int8_t) imm8;
+    uint16_t reg_sp = dmg->CPU.SP;
+    uint16_t res = reg_sp + signed_imm8 ;
+
+    //Extract flags
+    uint8_t h = ((reg_sp & 0x0F) + (imm8 & 0x0F)) > 0x0F;
+    uint8_t c = ((reg_sp & 0xFF) + (imm8 & 0xFF)) > 0xFF;
+
+    //Update flags 
+    update_flags(dmg, 0, 0, h, c);
+
+    dmg->CPU.SP = res;
+
+    dmg->CPU.PC += 2;
+
+    return 4;
+}
+
+uint8_t ld_hl_spimm8(dmg* dmg){
+    uint8_t imm8 = bus_read(dmg, dmg->CPU.PC + 1);
+    int8_t signed_imm8 = (int8_t) imm8;
+    uint16_t reg_sp = dmg->CPU.SP;
+    uint16_t res = reg_sp + signed_imm8 ;
+
+    //Extract flags
+    uint8_t h = ((reg_sp & 0x0F) + (imm8 & 0x0F)) > 0x0F;
+    uint8_t c = ((reg_sp & 0xFF) + (imm8 & 0xFF)) > 0xFF;
+
+    //Update flags 
+    update_flags(dmg, 0, 0, h, c);
+
+    dmg->CPU.HL = res;
+
+    dmg->CPU.PC += 2;
+
+    return 3;
+}
+
+uint8_t ld_sphl(dmg* dmg){
+    dmg->CPU.SP = dmg->CPU.HL;
+    dmg->CPU.PC++;
+    return 2;
+}
+
+uint8_t di(dmg* dmg){
+    dmg->CPU.ime = 0;
+    dmg->CPU.ime_scheduled = 0;
+    dmg->CPU.PC++;
+    return 1;
+}
+
+uint8_t ei(dmg* dmg){
+    dmg->CPU.ime_scheduled = 1;
+    dmg->CPU.PC++;
+    return 1;
 }
 
 //0xCB
