@@ -30,6 +30,16 @@ dmg* initiate_dmg(){
     return dmg;
 }
 
+uint16_t reg16stk_index(dmg* dmg, uint8_t input){
+    uint16_t* reg16stk[4] = {
+    &dmg->CPU.BC, 
+    &dmg->CPU.DE,
+    &dmg->CPU.HL,
+    &dmg->CPU.AF
+    };
+    return reg16stk[input];
+}
+
 uint16_t reg16bit_mem_index(dmg* dmg,uint8_t input){
     uint16_t* reg16map[4]= {&dmg->CPU.BC, &dmg->CPU.DE, &dmg->CPU.HL, &dmg->CPU.HL};
     static const int8_t mov[4]= {0,0,1,-1};
