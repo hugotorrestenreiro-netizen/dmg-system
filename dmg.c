@@ -30,7 +30,7 @@ dmg* initiate_dmg(){
     return dmg;
 }
 
-uint16_t reg16stk_index(dmg* dmg, uint8_t input){
+uint16_t* reg16stk_index(dmg* dmg, uint8_t input){
     uint16_t* reg16stk[4] = {
     &dmg->CPU.BC, 
     &dmg->CPU.DE,

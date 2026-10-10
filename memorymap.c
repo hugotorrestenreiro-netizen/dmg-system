@@ -9,6 +9,12 @@ void bus_write(dmg* dmg, uint16_t addr, uint8_t value){
     if(addr < 0x8000){
         return;
     }
+
+    if (addr == 0xFF02 && value == 0x81) {
+    uint8_t c = bus_read(dmg, 0xFF01);
+    printf("%c", c);
+    fflush(stdout);
+    }
     dmg->memory_map[addr>>10][addr & 0x03FF] = value;
     return;
 }

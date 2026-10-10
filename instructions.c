@@ -164,7 +164,7 @@ uint8_t daa(dmg* dmg){
     uint8_t c = (dmg->CPU.AF >> 4 ) & 1;
     //Check if high and low nibble > 9 or flag value (half carry for low nibble and carry for high nibble)
     uint8_t low_nib = h | (!n & ((reg_a & 0x0F) > 9));
-    uint8_t high_nib = c | (!n & (reg_a > 99));
+    uint8_t high_nib = c | (!n & (reg_a > 0x99));
     //Assemble high and low nibb, apply it on reg_a
     uint8_t BCD_filter = (high_nib * 0x60) | (low_nib * 0x06);
     reg_a += (1-2*n) * BCD_filter; //1-2*n to check if this is an add or sub
@@ -1072,7 +1072,7 @@ uint8_t block0_dispatch_z7(dmg* dmg, uint8_t opcode){
 
 uint8_t  block1_dispatch(dmg* dmg, uint8_t opcode){
     uint8_t yz = (opcode & 0x3F);
-    static const dispatch_t block1_z_index[64]={
+    static const function_dispatch_t block1_z_index[64]={
         LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8,
         LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8,
         LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8,
@@ -1084,7 +1084,7 @@ uint8_t  block1_dispatch(dmg* dmg, uint8_t opcode){
         LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, LD_r8r8, 
         LD_r8r8
     };
-    return block1_z_index[yz](dmg,opcode);
+    return block1_z_index[yz](dmg);
 }
 
 //      BLOCK 2

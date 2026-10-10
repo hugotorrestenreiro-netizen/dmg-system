@@ -46,6 +46,6 @@ uint16_t* reg16bit_index(dmg* dmg,uint8_t input);
 uint16_t reg16bit_mem_index(dmg* dmg,uint8_t input);
 dmg* initiate_dmg();
 uint8_t* load_rom(dmg* dmg, char* file_loc);
-uint16_t reg16stk_index(dmg* dmg, uint8_t input);
+uint16_t* reg16stk_index(dmg* dmg, uint8_t input);
 
 #endif
