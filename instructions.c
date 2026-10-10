@@ -170,7 +170,7 @@ uint8_t daa(dmg* dmg){
     reg_a += (1-2*n) * BCD_filter; //1-2*n to check if this is an add or sub
     //Update A Register and flags
     set_reg8bit_index(dmg, 7, reg_a);
-    update_flags(dmg, !reg_a, 0, 0, high_nib);
+    update_flags(dmg, !reg_a, n, 0, high_nib);
     dmg->CPU.PC ++;
     return 1;
 }
