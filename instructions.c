@@ -88,7 +88,7 @@ uint8_t inc_r8(dmg* dmg){
     update_flags(dmg, z, 0, h, c); 
     set_reg8bit_index(dmg, rr, res);                           
     dmg->CPU.PC++;
-    return 1;
+    return 1 + 2*(rr == 6);
 }                                                              //Je suis foutu pour les flags de ces deux fonctions :( :(. upd: PAS DU TOUT EN FAIT LA VIE EST BELLE.
 
 uint8_t dec_r8(dmg* dmg){
@@ -101,7 +101,7 @@ uint8_t dec_r8(dmg* dmg){
     update_flags(dmg, z, 1, h, c); 
     set_reg8bit_index(dmg, rr, res);                           //memo: ATTENTION GERER LES FLAGS Flags: Z 1 8-bit -
     dmg->CPU.PC++;
-    return 1;
+    return 1 + 2*(rr == 6);
 }
 
 uint8_t LD_r8imm8(dmg* dmg){
@@ -109,7 +109,7 @@ uint8_t LD_r8imm8(dmg* dmg){
     uint8_t imm8 = bus_read(dmg, dmg->CPU.PC + 1);
     set_reg8bit_index(dmg, rr, imm8);
     dmg->CPU.PC+=2;
-    return 2;
+    return 2 + (rr == 6);
 }
 
 uint8_t rlca(dmg* dmg){
@@ -178,8 +178,9 @@ uint8_t daa(dmg* dmg){
 uint8_t cpl(dmg* dmg){
     uint8_t a = get_reg8bit_index(dmg, 7);  //opcode: 00 101 111 (x= 00, y= 101, z=111)
     uint8_t c = (dmg->CPU.AF >> 4 ) & 1;
+    uint8_t z = (dmg->CPU.AF >> 7) & 1;
     a = 0xFF - a;
-    update_flags(dmg, !a, 1, 1, c);
+    update_flags(dmg, z, 1, 1, c);
     set_reg8bit_index(dmg, 7, a);
     dmg->CPU.PC ++;
     return 1;
@@ -228,7 +229,7 @@ uint8_t LD_r8r8(dmg* dmg){
     uint8_t zzz = (bus_read(dmg, dmg->CPU.PC) & 0x07);            //LD r8 r8'  opcode: 01 rrr rrr (x= 00, y= rrr, zzz= rrr)
     set_reg8bit_index(dmg, yyy, get_reg8bit_index(dmg, zzz));        //1 M cycle
     dmg->CPU.PC++;
-    return 1;
+    return 1 + (yyy == 6 || zzz == 6);
 }
 
 uint8_t halt(dmg* dmg){
@@ -463,7 +464,7 @@ uint8_t sbc_aimm8(dmg* dmg){
     uint8_t imm8_4bit = imm8 & 0x0F;
 
     uint8_t h = (reg_a_4bit < (imm8_4bit + c_old));
-    uint8_t c = (reg_a < (imm8_4bit + c_old));
+    uint8_t c = (reg_a < (imm8 + c_old));
 
     //Update flags 
     update_flags(dmg, !((uint8_t) res), 1, h, c);
