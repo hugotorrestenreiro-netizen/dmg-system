@@ -21,6 +21,7 @@ typedef struct
     uint8_t stop;
     uint8_t halt;
     uint8_t ime;
+    uint8_t ime_scheduled;
 
 }cpu;
 
