@@ -7,7 +7,7 @@ int main(int argc, char *argv[]){
     (void)argc;
     (void)argv;
 
-    char* file_loc = "cpu_instrs.gb";
+    char* file_loc = "03-op sp,hl.gb";
 
     uint32_t START ,DT = 16;
 
@@ -53,6 +53,10 @@ int main(int argc, char *argv[]){
         }
 
         //FETCH DECODE EXECUTE
+        if(dmg->CPU.ime_scheduled){
+            dmg->CPU.ime = 1;
+            dmg->CPU.ime_scheduled=0;
+        }
         uint8_t opcode = bus_read(dmg, dmg->CPU.PC);
         cycle = instruction_table(dmg, opcode);
         dmg->CPU.cycle += cycle;

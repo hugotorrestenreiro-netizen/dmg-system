@@ -36,6 +36,16 @@ uint8_t block3_z3_dispatch_y5(dmg* dmg, uint8_t opcode);
 uint8_t block3_z3_dispatch_y6(dmg* dmg, uint8_t opcode);
 uint8_t block3_z3_dispatch_y7(dmg* dmg, uint8_t opcode);
 
+uint8_t block3_dispatch_z0(dmg* dmg, uint8_t opcode);
+uint8_t block3_dispatch_z1(dmg* dmg, uint8_t opcode);
+uint8_t block3_dispatch_z2(dmg* dmg, uint8_t opcode);
+uint8_t block3_dispatch_z3(dmg* dmg, uint8_t opcode);
+uint8_t block3_dispatch_z4(dmg* dmg, uint8_t opcode);
+uint8_t block3_dispatch_z5(dmg* dmg, uint8_t opcode);
+uint8_t block3_dispatch_z6(dmg* dmg, uint8_t opcode);
+uint8_t block3_dispatch_z7(dmg* dmg, uint8_t opcode);
+
+
 uint8_t block3_CB_dispatch_x0(dmg* dmg, uint8_t opcode);
 uint8_t block3_CB_dispatch_x1(dmg* dmg, uint8_t opcode);
 uint8_t block3_CB_dispatch_x2(dmg* dmg, uint8_t opcode);
