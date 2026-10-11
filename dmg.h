@@ -15,6 +15,7 @@ typedef struct
     uint16_t HL ; // HL (High: H(4), Low: L(5))
     uint16_t SP ; // SP (stack)
     uint16_t PC ; // PC 
+    uint16_t sys_counter;
     uint8_t* reg8bit_map[8]; // 8bit register map
     uint16_t* reg16bit_map[4];
     uint32_t cycle; 
@@ -63,5 +64,6 @@ uint16_t* reg16stk_index(dmg* dmg, uint8_t input);
 void key_down(dmg* dmg, dmg_key_t key);
 void key_up(dmg* dmg, dmg_key_t key);
 void cpu_step(dmg* dmg);
+void timer_step(dmg* dmg, uint32_t m_cycle);
 
 #endif

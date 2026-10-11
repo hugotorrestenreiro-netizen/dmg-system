@@ -26,6 +26,7 @@ dmg* initiate_dmg(){
 
     dmg->CPU.SP = 0xFFFE;
     dmg->CPU.PC = 0x0100;
+    dmg->memory[0xFF00] = 0xC0;
 
     return dmg;
 }
@@ -168,4 +169,31 @@ void cpu_step(dmg* dmg){
         dmg->CPU.cycle += cycle;
     }
         
+}
+
+//  TIMERS
+
+void timer_step(dmg* dmg, uint32_t m_cycle){
+    uint32_t t_cycle = 4 * m_cycle;
+    const static uint8_t tac_bit_target[4] = { 9, 3, 5, 7 };
+    
+    uint8_t tac_reg = bus_read(dmg, 0xFF07);
+    uint8_t tac_target = (tac_reg & 0x03);
+    uint8_t tac_enable = ((tac_reg & 4) >>2) ;
+
+    uint8_t bit_pos = tac_bit_target[tac_target];
+    for(int i = 0; i< t_cycle; i++){
+        uint8_t tac_old = tac_enable * ((dmg->CPU.sys_counter >> bit_pos) & 1);
+        dmg->CPU.sys_counter ++;
+        uint8_t tac_new = tac_enable * ((dmg->CPU.sys_counter >> bit_pos) & 1);
+        
+        if((tac_old == 1) && (tac_new == 0)){
+            uint8_t tima = bus_read(dmg,0xFF05) + 1;
+            if(tima == 0){
+                tima = bus_read(dmg, 0xFF06);
+                bus_write(dmg, 0xFF0F, bus_read(dmg, 0xFF0F) | (1<<2));
+            }
+            bus_write(dmg, 0xFF05, tima);
+        }
+    }
 }
