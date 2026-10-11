@@ -7,7 +7,7 @@ int main(int argc, char *argv[]){
     (void)argc;
     (void)argv;
 
-    char* file_loc = "individual/11-op a,(hl).gb";
+    char* file_loc = "individual/02-interrupts.gb";
 
     uint32_t START ,DT = 16;
 
@@ -45,7 +45,7 @@ int main(int argc, char *argv[]){
         cpu_step(dmg);
         delta_cycle = dmg->CPU.cycle - cycle_old;
         
-        // timer_step(dmg, delta_cycle);
+        timer_step(dmg, delta_cycle) ;
         // ppu(dmg, delta_cycle);
 
         //ACCUMULATOR

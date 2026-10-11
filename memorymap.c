@@ -5,11 +5,19 @@ uint8_t bus_read(dmg* dmg, uint16_t addr){
     if (addr == 0xFF00){
         return joypad_read(dmg);
     }
+    if (addr == 0xFF04){
+        return (dmg->CPU.sys_counter >> 8) & 0xFF;
+    }
     return dmg->memory_map[addr>>10][addr & 0x03FF];
 }
 
 void bus_write(dmg* dmg, uint16_t addr, uint8_t value){
     if(addr < 0x8000){
+        return;
+    }
+
+    if(addr == 0xFF04){
+        dmg->CPU.sys_counter = 0;
         return;
     }
 
