@@ -67,6 +67,7 @@ int main(int argc, char *argv[]){
             }
         }
         dmg->CPU.cycle -= 17556;
+        //dmg->PPU.cycle -= 17556*4;
         }   
 
     }
