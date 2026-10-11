@@ -7,7 +7,7 @@ int main(int argc, char *argv[]){
     (void)argc;
     (void)argv;
 
-    char* file_loc = "03-op sp,hl.gb";
+    char* file_loc = "individual/11-op a,(hl).gb";
 
     uint32_t START ,DT = 16;
 

@@ -2,7 +2,7 @@
 #include "memorymap.h"
 
 uint8_t bus_read(dmg* dmg, uint16_t addr){
-    if (addr = 0xFF00){
+    if (addr == 0xFF00){
         return joypad_read(dmg);
     }
     return dmg->memory_map[addr>>10][addr & 0x03FF];

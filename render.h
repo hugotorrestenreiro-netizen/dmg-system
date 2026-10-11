@@ -16,6 +16,6 @@
 SDL_Window* open_window();
 SDL_Renderer* initiate_renderer(SDL_Window* window);
 void handle_key_event(dmg* dmg, SDL_Keycode key, uint8_t state);
-typedef void (*state_dispatch_t)(dmg* dmg, key_t key);
+typedef void (*state_dispatch_t)(dmg* dmg, dmg_key_t key);
 
 #endif

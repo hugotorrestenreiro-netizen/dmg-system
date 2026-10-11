@@ -36,7 +36,7 @@ SDL_Renderer* initiate_renderer(SDL_Window* window){
 }
 
 void handle_key_event(dmg* dmg, SDL_Keycode key, uint8_t state) {
-    key_t key_input;
+    dmg_key_t key_input;
     switch (key) {
 
         case UP_input: 
