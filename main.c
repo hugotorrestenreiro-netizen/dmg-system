@@ -35,8 +35,23 @@ int main(int argc, char *argv[]){
     int running = 1;
 
     dmg->CPU.cycle = 0;
+    uint32_t cycle_old;
+    uint32_t delta_cycle;
 
     while(running){
+        
+        //FETCH DECODE EXECUTE
+        cycle_old = dmg->CPU.cycle;
+        cpu_step(dmg);
+        delta_cycle = dmg->CPU.cycle - cycle_old;
+        
+        // timer_step(dmg, delta_cycle);
+        // dmg->PPU.cycle += delta_cycle * 4;
+        // ppu(dmg, delta_cycle);
+
+        //ACCUMULATOR
+
+        if(dmg->CPU.cycle >= 17556){
         while(SDL_PollEvent(&event)){
             //Inputs
             if(event.type == SDL_QUIT){
@@ -51,11 +66,8 @@ int main(int argc, char *argv[]){
                 handle_key_event(dmg, event.key.keysym.sym, 0);
             }
         }
-
-        //FETCH DECODE EXECUTE
-        cpu_step(dmg);
-        //ACCUMULATOR
-
+        dmg->CPU.cycle -= 17556;
+        }   
 
     }
 
