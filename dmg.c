@@ -1,6 +1,6 @@
 #include "dmg.h"
 
-
+// INITIATE
 dmg* initiate_dmg(){
     dmg* dmg;
     dmg = calloc(1,sizeof(*dmg));
@@ -40,6 +40,8 @@ uint16_t* reg16stk_index(dmg* dmg, uint8_t input){
     return reg16stk[input];
 }
 
+//  REG INDEX HELPER
+
 uint16_t reg16bit_mem_index(dmg* dmg,uint8_t input){
     uint16_t* reg16map[4]= {&dmg->CPU.BC, &dmg->CPU.DE, &dmg->CPU.HL, &dmg->CPU.HL};
     static const int8_t mov[4]= {0,0,1,-1};
@@ -68,6 +70,8 @@ void set_reg8bit_index(dmg* dmg, uint8_t input, uint8_t value){
     *dmg->CPU.reg8bit_map[input] = value;
     return;
 }
+
+//  ROM LOADING
 
 uint8_t* load_rom(dmg* dmg, char* file_loc){
     if(file_loc == NULL){
@@ -106,13 +110,15 @@ uint8_t* load_rom(dmg* dmg, char* file_loc){
     return NULL;
 }
 
-void key_up(dmg* dmg, key_t key){
-    dmg->joypad_state = dmg->joypad_state & ~(1 << key);
+//  JOYPAD
+
+void key_up(dmg* dmg, dmg_key_t key){
+    dmg->joypad_state = dmg->joypad_state & ~key;
     return;
 }
 
-void key_down(dmg* dmg, key_t key){
-    dmg->joypad_state = dmg->joypad_state | (1 << key);
+void key_down(dmg* dmg, dmg_key_t key){
+    dmg->joypad_state = dmg->joypad_state | key;
     uint8_t joypad_val = dmg->memory[0xFF00];
     if((key < 4 && ((joypad_val >> 4) & 1) == 0)){
         dmg->memory[0xFF0F] |=  (1<<4);
@@ -123,10 +129,11 @@ void key_down(dmg* dmg, key_t key){
     return;
 }
 
+//      FETCH DECODE EXECUTE
+
 void cpu_step(dmg* dmg){
     uint8_t cycle;
     uint8_t pending = (dmg->memory[0xFF0F] & dmg->memory[0xFFFF] & 0x1F);
-    //      FETCH DECODE EXECUTE
         //  IME
     if((dmg->CPU.ime == 1) && pending){
         dmg->CPU.ime = 0;

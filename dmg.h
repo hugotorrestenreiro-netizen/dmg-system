@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "memorymap.h"
+#include "instructions.h"
 
 typedef struct
 {
@@ -50,7 +51,7 @@ typedef enum {
     BUTTON_B = 1 << 5,
     BUTTON_SELECT = 1 << 6,
     BUTTON_START =  1 << 7,
-}key_t;
+}dmg_key_t;
 
 uint8_t get_reg8bit_index(dmg* dmg, uint8_t input);
 void set_reg8bit_index(dmg* dmg, uint8_t input, uint8_t value);
@@ -59,8 +60,8 @@ uint16_t reg16bit_mem_index(dmg* dmg,uint8_t input);
 dmg* initiate_dmg();
 uint8_t* load_rom(dmg* dmg, char* file_loc);
 uint16_t* reg16stk_index(dmg* dmg, uint8_t input);
-void key_down(dmg* dmg, key_t key);
-void key_up(dmg* dmg, key_t key);
+void key_down(dmg* dmg, dmg_key_t key);
+void key_up(dmg* dmg, dmg_key_t key);
 void cpu_step(dmg* dmg);
 
 #endif
