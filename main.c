@@ -46,7 +46,6 @@ int main(int argc, char *argv[]){
         delta_cycle = dmg->CPU.cycle - cycle_old;
         
         // timer_step(dmg, delta_cycle);
-        // dmg->PPU.cycle += delta_cycle * 4;
         // ppu(dmg, delta_cycle);
 
         //ACCUMULATOR
