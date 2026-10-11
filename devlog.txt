@@ -201,11 +201,19 @@ seront prêtes afin d'indexer le tableau d'une bonne fois et d'être bien struct
  
 ##07/10/2026
 
-#tableau d'instructions (DE LA PLUS HAUTE IMPORTANCE)
+#check conditions
 //à écrire
 
-#check conditions
+#tableau d'instructions (DE LA PLUS HAUTE IMPORTANCE)
 //à écrire
 
 Par simple manque d'inspiration, et après un long cassage de crâne j'estime que certaines fonctions restent meilleures avec if (notament ici l'instruction qui m'embête est un
 RET)
+
+##11/10/2026
+
+J'ai le grand honneur d'annoncer que les instructions ainsi que leur cablage sur le tableau d'instruction est définitivement terminé, je suppose tout de même que je risque
+de repasser desus car je pars du principe qu'il y a potentiellement encore une ou deux petites fautes (notamment sur les retour de cycle d'horloge ou quoi).
+
+#joypad
+//à écrire
