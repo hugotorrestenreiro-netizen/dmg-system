@@ -106,4 +106,59 @@ uint8_t* load_rom(dmg* dmg, char* file_loc){
     return NULL;
 }
 
-// void update_flags_add8()
+void key_up(dmg* dmg, key_t key){
+    dmg->joypad_state = dmg->joypad_state & ~(1 << key);
+    return;
+}
+
+void key_down(dmg* dmg, key_t key){
+    dmg->joypad_state = dmg->joypad_state | (1 << key);
+    uint8_t joypad_val = dmg->memory[0xFF00];
+    if((key < 4 && ((joypad_val >> 4) & 1) == 0)){
+        dmg->memory[0xFF0F] |=  (1<<4);
+    }
+    if((key >= 4 &&((joypad_val >> 5) & 1) == 0)){
+        dmg->memory[0xFF0F] |=  (1<<4);
+    }
+    return;
+}
+
+void cpu_step(dmg* dmg){
+    uint8_t cycle;
+    uint8_t pending = (dmg->memory[0xFF0F] & dmg->memory[0xFFFF] & 0x1F);
+    //      FETCH DECODE EXECUTE
+        //  IME
+    if((dmg->CPU.ime == 1) && pending){
+        dmg->CPU.ime = 0;
+        dmg->CPU.halt = 0;
+        dmg->CPU.SP--;
+        bus_write(dmg, dmg->CPU.SP, (dmg->CPU.PC >> 8) & 0xFF);
+        dmg->CPU.SP--;
+        bus_write(dmg, dmg->CPU.SP, dmg->CPU.PC & 0xFF);
+        for (int i = 0; i < 5; i++){
+            if(pending & (1 << i)){
+                dmg->memory[0xFF0F] &= ~(1 << i);
+                dmg->CPU.PC = 0x0040 + (i*8);
+                break;
+            }
+        }
+        dmg->CPU.cycle += 5;
+    }
+    //  HALT
+    else if (dmg->CPU.halt == 1){
+        dmg->CPU.cycle += 1;
+        uint8_t halt_stop = (dmg->memory[0xFF0F] & dmg->memory[0xFFFF] & 0x1F);
+        dmg->CPU.halt = !halt_stop;
+    }
+    //  NORMAL CPU
+    else if(dmg->CPU.halt == 0){
+        if(dmg->CPU.ime_scheduled){
+            dmg->CPU.ime = 1;
+            dmg->CPU.ime_scheduled=0;
+        }
+        uint8_t opcode = bus_read(dmg, dmg->CPU.PC);
+        cycle = instruction_table(dmg, opcode);
+        dmg->CPU.cycle += cycle;
+    }
+        
+}

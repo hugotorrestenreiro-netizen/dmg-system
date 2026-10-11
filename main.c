@@ -36,8 +36,6 @@ int main(int argc, char *argv[]){
 
     dmg->CPU.cycle = 0;
 
-    uint16_t cycle;
-
     while(running){
         while(SDL_PollEvent(&event)){
             //Inputs
@@ -45,22 +43,17 @@ int main(int argc, char *argv[]){
                 running = 0;
             }
             else if (event.type == SDL_KEYDOWN) {
-                ;
+                if(event.key.repeat == 0) {
+                    handle_key_event(dmg, event.key.keysym.sym, 1);
+                }
             } 
             else if (event.type == SDL_KEYUP) {
-                ;
+                handle_key_event(dmg, event.key.keysym.sym, 0);
             }
         }
 
         //FETCH DECODE EXECUTE
-        if(dmg->CPU.ime_scheduled){
-            dmg->CPU.ime = 1;
-            dmg->CPU.ime_scheduled=0;
-        }
-        uint8_t opcode = bus_read(dmg, dmg->CPU.PC);
-        cycle = instruction_table(dmg, opcode);
-        dmg->CPU.cycle += cycle;
-
+        cpu_step(dmg);
         //ACCUMULATOR
 
 

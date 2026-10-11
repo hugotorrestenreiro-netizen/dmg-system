@@ -9,12 +9,13 @@
 #define LEFT_input   SDLK_LEFT
 #define RIGHT_input  SDLK_RIGHT
 #define A_input      SDLK_a
-#define B_input      SDLK_b
+#define B_input      SDLK_z
 #define START_input  SDLK_w
 #define SELECT_input SDLK_x
 
 SDL_Window* open_window();
 SDL_Renderer* initiate_renderer(SDL_Window* window);
 void handle_key_event(dmg* dmg, SDL_Keycode key, uint8_t state);
+typedef void (*state_dispatch_t)(dmg* dmg, key_t key);
 
 #endif

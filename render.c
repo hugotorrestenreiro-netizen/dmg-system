@@ -36,26 +36,38 @@ SDL_Renderer* initiate_renderer(SDL_Window* window){
 }
 
 void handle_key_event(dmg* dmg, SDL_Keycode key, uint8_t state) {
+    key_t key_input;
     switch (key) {
 
         case UP_input: 
+            key_input = BUTTON_UP;
             break; 
         case DOWN_input: 
+            key_input = BUTTON_DOWN;
             break; 
-        case LEFT_input: 
+        case LEFT_input:
+            key_input = BUTTON_LEFT;
             break; 
-        case RIGHT_input: 
+        case RIGHT_input:
+            key_input = BUTTON_RIGHT;
             break; 
 
-        case A_input: 
+        case A_input:
+            key_input = BUTTON_A;
             break; 
-        case B_input:  
+        case B_input:
+            key_input = BUTTON_B;
             break; 
-        case START_input: 
+        case START_input:
+            key_input = BUTTON_START;
             break; 
-        case SELECT_input: 
+        case SELECT_input:
+            key_input = BUTTON_SELECT;
             break;  
 
-        default: break;
+        default: return;
     }
+    state_dispatch_t state_dispatch[2] = {key_up, key_down};
+    state_dispatch[state](dmg, key_input);
+    return;
 }
