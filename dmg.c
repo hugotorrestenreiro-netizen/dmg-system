@@ -103,7 +103,7 @@ uint8_t* load_rom(dmg* dmg, char* file_loc){
         }
         fread(rom_buffer, 1, size, file);
         fclose(file);
-       for (int i = 0; i < 32; i++) {
+        for (int i = 0; i < 32; i++) {
         if (i * 1024 < size) {
             dmg->memory_map[i] = &rom_buffer[i * 1024];
         }
@@ -180,14 +180,14 @@ void cpu_step(dmg* dmg){
 
 void timer_step(dmg* dmg, uint32_t m_cycle){
     uint32_t t_cycle = 4 * m_cycle;
-    const static uint8_t tac_bit_target[4] = { 9, 3, 5, 7 };
+    static const uint8_t tac_bit_target[4] = { 9, 3, 5, 7 };
     
     uint8_t tac_reg = bus_read(dmg, 0xFF07);
     uint8_t tac_target = (tac_reg & 0x03);
     uint8_t tac_enable = ((tac_reg & 4) >>2) ;
 
     uint8_t bit_pos = tac_bit_target[tac_target];
-    for(int i = 0; i< t_cycle; i++){
+    for(uint32_t i = 0; i < t_cycle; i++){
         uint8_t tac_old = tac_enable * ((dmg->CPU.sys_counter >> bit_pos) & 1);
         dmg->CPU.sys_counter ++;
         uint8_t tac_new = tac_enable * ((dmg->CPU.sys_counter >> bit_pos) & 1);

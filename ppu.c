@@ -9,7 +9,7 @@ void ppu_step(dmg* dmg, uint32_t m_cycle){
         return;
     }
     uint32_t t_cycle = 4*m_cycle;
-    for (int i = 0; i < t_cycle; i++){
+    for (uint32_t i = 0; i < t_cycle; i++){
         ppu_mode_dispatch(dmg);
         dmg->PPU.ppu_cycle++;
     }

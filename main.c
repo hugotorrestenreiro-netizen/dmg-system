@@ -1,6 +1,7 @@
 #include "dmg.h"
 #include "render.h"
 #include "instructions.h"
+#include "ppu.h"
 
 int main(int argc, char *argv[]){
 
@@ -9,7 +10,7 @@ int main(int argc, char *argv[]){
 
     char* file_loc = "tetris.gb";
 
-    uint32_t START ,DT = 16;
+
 
     SDL_Window* window = open_window();
     SDL_Renderer* renderer = initiate_renderer(window);
@@ -37,9 +38,12 @@ int main(int argc, char *argv[]){
     dmg->CPU.cycle = 0;
     uint32_t cycle_old;
     uint32_t delta_cycle;
+    uint32_t start;
+    uint32_t frame_time;
 
     while(running){
         
+        start = SDL_GetTicks();
         //FETCH DECODE EXECUTE
         cycle_old = dmg->CPU.cycle;
         cpu_step(dmg);
@@ -50,25 +54,30 @@ int main(int argc, char *argv[]){
         //ACCUMULATOR
 
         if(dmg->CPU.cycle >= 17556){
-        while(SDL_PollEvent(&event)){
-            //Inputs
-            if(event.type == SDL_QUIT){
-                running = 0;
-            }
-            else if (event.type == SDL_KEYDOWN) {
-                if(event.key.repeat == 0) {
-                    handle_key_event(dmg, event.key.keysym.sym, 1);
+            while(SDL_PollEvent(&event)){
+                //Inputs
+                if(event.type == SDL_QUIT){
+                    running = 0;
                 }
-            } 
-            else if (event.type == SDL_KEYUP) {
-                handle_key_event(dmg, event.key.keysym.sym, 0);
+                else if (event.type == SDL_KEYDOWN) {
+                    if(event.key.repeat == 0) {
+                    handle_key_event(dmg, event.key.keysym.sym, 1);
+                    }
+                } 
+                else if (event.type == SDL_KEYUP) {
+                    handle_key_event(dmg, event.key.keysym.sym, 0);
+                }
+            }
+            render_frame(renderer, texture, dmg->PPU.display);
+            dmg->CPU.cycle -= 17556;
+            //dmg->PPU.cycle -= 17556*4;
+
+            frame_time = SDL_GetTicks() - start;
+
+            if(frame_time < 16){
+                SDL_Delay(16 - frame_time);
             }
         }
-        render_frame(renderer, texture, dmg->PPU.display);
-        dmg->CPU.cycle -= 17556;
-        //dmg->PPU.cycle -= 17556*4;
-        }   
-
     }
 
     free(dmg);
