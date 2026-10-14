@@ -163,7 +163,7 @@ Les instructions déjà implémentées utilisent maintenant les fonctions bus_re
 
 #cycle d'horloge
 
-Je viens de me rendre compte dans mon code que pour l'instant j'ai complètement oublié l'implémentantion de la prise en charge du compteur de cycles cpu (qui sera extrêmement
+Je viens de me rendre compte dans mon code que pour l'instant j'ai complètement oublié l'implémentation de la prise en charge du compteur de cycles cpu (qui sera extrêmement
 important plus tard pour synchroniser le cpu et le ppu (un cycle cpu = 4 cycles ppu)). Mes instructions retourneront maintenant le nombre de cycles effectuées lors de leur exécution
 (ce qui me permettra plus tard d'uniquement faire la partie execute en 1 ligne (m_cycle = "fonction d'exectute";    dmg->CPU.cycle += m_cycle;)).
 
@@ -218,15 +218,24 @@ et si c'est 1 on vérifie le flag en lui même.
 //à écrire
 
 Par simple manque d'inspiration, et après un long cassage de crâne j'estime que certaines fonctions restent meilleures avec if (notament ici l'instruction qui m'embête est un
-RET)
+RET), en fait utiliser des ifs dans des cas où il y a une issue très probable baisse drastiquement le risque de pipeline flush, donc dans certains cas il est plus propre
+et plus optimal d'utiliser un if. Je vais notament en utiliser sur le ppu.
 
 ##11/10/2026
 
 J'ai le grand honneur d'annoncer que les instructions ainsi que leur cablage sur le tableau d'instruction est définitivement terminé, je suppose tout de même que je risque
-de repasser desus car je pars du principe qu'il y a potentiellement encore une ou deux petites fautes (notamment sur les retour de cycle d'horloge ou quoi).
+de repasser desus car je pars du principe qu'il y a potentiellement encore une ou deux petites fautes (notament sur les retour de cycle d'horloge ou quoi).
 
 #joypad
 //à écrire (utilisation de buffer puis d'un reader)
 
 #boucle main
 //structure globale (accumulateur etc)
+
+#ppu
+
+1: Fonctionnement global
+
+2: modes
+
+3: implémentation
