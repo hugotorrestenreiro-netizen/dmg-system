@@ -23,7 +23,7 @@ int main(int argc, char *argv[]){
     return 1;
     }
 
-    SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 64, 32);
+    SDL_Texture* texture = create_ppu_texture(renderer);
 
     uint8_t* rom_buffer = load_rom(dmg, file_loc);
 
@@ -46,8 +46,7 @@ int main(int argc, char *argv[]){
         delta_cycle = dmg->CPU.cycle - cycle_old;
         
         timer_step(dmg, delta_cycle) ;
-        // ppu(dmg, delta_cycle);
-
+        ppu_step(dmg, delta_cycle);
         //ACCUMULATOR
 
         if(dmg->CPU.cycle >= 17556){
@@ -65,6 +64,7 @@ int main(int argc, char *argv[]){
                 handle_key_event(dmg, event.key.keysym.sym, 0);
             }
         }
+        render_frame(renderer, texture, dmg->PPU.display);
         dmg->CPU.cycle -= 17556;
         //dmg->PPU.cycle -= 17556*4;
         }   

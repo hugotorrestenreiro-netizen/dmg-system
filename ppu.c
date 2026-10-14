@@ -60,7 +60,7 @@ void ppu_mode_2_oam_search(dmg* dmg){
                 sprite.x = (int16_t) bus_read(dmg, i + 1) - 8;
                 sprite.tile = bus_read(dmg, i + 2);
                 sprite.flags = bus_read(dmg, i + 3);
-                dmg->PPU.selected_sprite[dmg->PPU.sprite_count] = sprite;
+                dmg->PPU.selected_sprite[dmg->PPU.sprite_count++] = sprite;
 
                 if(dmg->PPU.sprite_count == 10){
                     break;
