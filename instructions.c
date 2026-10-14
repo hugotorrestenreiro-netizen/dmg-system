@@ -1188,6 +1188,7 @@ uint8_t block3_z3_dispatch_y0(dmg* dmg, uint8_t opcode){
 }
 
 uint8_t block3_z3_dispatch_y1(dmg* dmg, uint8_t opcode){
+    (void) opcode;
     uint8_t new_opcode = bus_read(dmg, dmg->CPU.PC + 1);
     uint8_t x = (new_opcode & 0xC0) >> 6;
     static const dispatch_t CB_x_dispatch[4]={
