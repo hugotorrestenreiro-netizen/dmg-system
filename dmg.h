@@ -27,14 +27,21 @@ typedef struct
 
 }cpu;
 
+typedef struct dmg_sprite_t{
+    int16_t x;
+    int16_t y;
+    uint8_t tile;
+    uint8_t flags;
+}dmg_sprite_t;
+
 typedef struct
 {
-    uint8_t diplay[160*144]; //Diplay: 160*144 pixels (from 0 to 3 (there are 4 shades of green))
+    uint8_t display[160*144]; //Diplay: 160*144 pixels (from 0 to 3 (there are 4 shades of green))
     uint8_t LY;
     uint8_t ppu_cycle;
     uint8_t mode; //Mode 2 = 2, Mode 3 = 3, Mode 0 = 0 and Mode 1 = 1
     uint8_t sprite_count;
-    uint16_t selected_sprite[10];
+    dmg_sprite_t selected_sprite[10];
 }ppu;
 
 

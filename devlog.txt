@@ -232,7 +232,7 @@ de repasser desus car je pars du principe qu'il y a potentiellement encore une o
 #boucle main
 //structure globale (accumulateur etc)
 
-#ppu
+#ppu  (Pas de Fifo c'est bcp trop compliqué (ça me donne mal au crâne), je préfère faire un affichage ligne par ligne plus simple à implémenter)
 
 1: Fonctionnement global
 
