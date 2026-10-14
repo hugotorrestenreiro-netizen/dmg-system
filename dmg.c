@@ -28,6 +28,11 @@ dmg* initiate_dmg(){
     dmg->CPU.PC = 0x0100;
     dmg->memory[0xFF00] = 0xC0;
 
+    dmg->CPU.AF = 0x01B0;  dmg->CPU.BC = 0x0013;
+    dmg->CPU.DE = 0x00D8;  dmg->CPU.HL = 0x014D;
+    dmg->memory[0xFF40] = 0x91; 
+    dmg->memory[0xFF47] = 0xFC;
+
     return dmg;
 }
 
