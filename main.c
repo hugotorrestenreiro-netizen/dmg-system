@@ -7,7 +7,7 @@ int main(int argc, char *argv[]){
     (void)argc;
     (void)argv;
 
-    char* file_loc = "individual/01-special.gb";
+    char* file_loc = "tetris.gb";
 
     uint32_t START ,DT = 16;
 

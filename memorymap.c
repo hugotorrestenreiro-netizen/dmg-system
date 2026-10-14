@@ -3,7 +3,7 @@
 
 uint8_t bus_read(dmg* dmg, uint16_t addr){
     if (addr == 0xFF44) return dmg->PPU.LY;
-    
+
     if (addr == 0xFF00){
         return joypad_read(dmg);
     }
@@ -16,6 +16,14 @@ uint8_t bus_read(dmg* dmg, uint16_t addr){
 void bus_write(dmg* dmg, uint16_t addr, uint8_t value){
     if(addr < 0x8000){
         return;
+    }
+
+    if(addr == 0xFF46){
+        uint16_t source = value << 8;
+        for(int i = 0; i < 160; i++){
+            uint8_t byte = bus_read(dmg, source + i);
+            bus_write(dmg, 0xFE00 + i, byte);
+        }
     }
 
     if(addr == 0xFF04){
