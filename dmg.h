@@ -38,7 +38,7 @@ typedef struct
 {
     uint8_t display[160*144]; //Diplay: 160*144 pixels (from 0 to 3 (there are 4 shades of green))
     uint8_t LY;
-    uint8_t ppu_cycle;
+    uint16_t ppu_cycle;
     uint8_t mode; //Mode 2 = 2, Mode 3 = 3, Mode 0 = 0 and Mode 1 = 1
     uint8_t sprite_count;
     dmg_sprite_t selected_sprite[10];

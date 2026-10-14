@@ -2,6 +2,8 @@
 #include "memorymap.h"
 
 uint8_t bus_read(dmg* dmg, uint16_t addr){
+    if (addr == 0xFF44) return dmg->PPU.LY;
+    
     if (addr == 0xFF00){
         return joypad_read(dmg);
     }
