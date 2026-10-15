@@ -9,6 +9,7 @@ int main(int argc, char *argv[]){
     (void)argv;
 
     char* file_loc = "tetris.gb";
+    int capped_fps = 1;
 
 
 
@@ -67,6 +68,12 @@ int main(int argc, char *argv[]){
                 else if (event.type == SDL_KEYUP) {
                     handle_key_event(dmg, event.key.keysym.sym, 0);
                 }
+                if (event.type == SDL_KEYUP && capped_fps == 0){
+                    capped_fps = 1;
+                }
+                else if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_TAB){
+                    capped_fps = 0;
+                }
             }
             render_frame(renderer, texture, dmg->PPU.display);
             dmg->CPU.cycle -= 17556;
@@ -74,7 +81,7 @@ int main(int argc, char *argv[]){
 
             frame_time = SDL_GetTicks() - start;
 
-            if(frame_time < 16){
+            if(frame_time < 16 && capped_fps){
                 SDL_Delay(16 - frame_time);
             }
         }
