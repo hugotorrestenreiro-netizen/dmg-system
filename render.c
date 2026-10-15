@@ -32,7 +32,7 @@ SDL_Window* open_window(){
 SDL_Renderer* initiate_renderer(SDL_Window* window){
     SDL_Renderer* renderer = NULL;
 
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if(!renderer){
         printf("Rendering initialization error.\n");
         SDL_DestroyWindow(window);
