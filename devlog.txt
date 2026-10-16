@@ -232,6 +232,8 @@ de repasser desus car je pars du principe qu'il y a potentiellement encore une o
 #boucle main
 //structure globale (accumulateur etc)
 
+##14/10/2026
+
 #ppu  (Pas de Fifo c'est bcp trop compliqué (ça me donne mal au crâne), je préfère faire un affichage ligne par ligne plus simple à implémenter)
 
 1: Fonctionnement global
@@ -242,4 +244,17 @@ de repasser desus car je pars du principe qu'il y a potentiellement encore une o
 
 registre STAT
 
-#MBC
+##15/10/2026
+
+#MBC1
+
+##16/10/2026
+
+#APU
+
+Pour l'apu (gestion de sons), je vais faire appel à la librairie de blargg Gb_apu, car m'investir dans de la gestion de signaux ne me ferait que perdre du temps,
+ce n'est pas un élément qui va développer mon niveau d'ingénieurerie système, ce qui est l'objectif principal de ce projet.
+
+#MBC3
+
+#MBC5

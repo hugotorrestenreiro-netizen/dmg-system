@@ -21,8 +21,6 @@ void ppu_step(dmg* dmg, uint32_t m_cycle){
 }
 
 void ppu_mode_dispatch(dmg* dmg){
-    uint8_t stat = bus_read(dmg, 0xFF41);
-    bus_write(dmg, 0xFF41, (stat & 0xFC) | (dmg->PPU.mode & 0x03));
     switch (dmg->PPU.mode)
     {
     case 2:

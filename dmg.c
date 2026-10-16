@@ -111,8 +111,15 @@ void load_rom(dmg* dmg, char* file_loc){
         if(mbc_game_type >= 0x01 && mbc_game_type <= 0x03){
             dmg->MBC.mbc_type = 1;
         }
+        else if(mbc_game_type >= 0x0F && mbc_game_type <= 0x13){
+            dmg->MBC.mbc_type = 3;
+        }
+        else if(mbc_game_type >= 0x19 && mbc_game_type <= 0x1E){
+        dmg->MBC.mbc_type = 5;
+        }
         else{
             dmg->MBC.mbc_type = 0;
+            if(mbc_game_type != 0x00) printf("Cartdrige type not allowed : %02X\n", mbc_game_type);
         }
         dmg->MBC.rom_bank = 1;
         dmg->MBC.ram_bank = 0;

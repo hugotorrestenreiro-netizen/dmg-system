@@ -49,10 +49,10 @@ typedef struct mbc
 {
     uint8_t* rom_buffer;
     uint32_t rom_size;
-    uint8_t ram_buffer[32 * 1024];
+    uint8_t ram_buffer[128 * 1024];
     uint8_t mbc_type;
     uint8_t ram_enabled;
-    uint8_t rom_bank;
+    uint16_t rom_bank;
     uint8_t ram_bank;
     uint8_t banking_mode;
     uint8_t dummy_ram[1024];
