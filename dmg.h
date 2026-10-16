@@ -42,6 +42,7 @@ typedef struct
     uint8_t mode; //Mode 2 = 2, Mode 3 = 3, Mode 0 = 0 and Mode 1 = 1
     uint8_t sprite_count;
     dmg_sprite_t selected_sprite[10];
+    uint8_t stat_reg_signal;
 }ppu;
 
 typedef struct mbc
