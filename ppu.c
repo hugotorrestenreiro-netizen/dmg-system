@@ -1,11 +1,15 @@
 #include "ppu.h"
 
 void ppu_step(dmg* dmg, uint32_t m_cycle){
+
+    update_stat_flags(dmg);
+
     uint8_t lcdc = bus_read(dmg, 0xFF40);
     if ((lcdc & 0x80) == 0) {
         dmg->PPU.ppu_cycle = 0;
         dmg->PPU.LY = 0;
         dmg->PPU.mode = 0;
+        update_stat_flags(dmg);
         return;
     }
     uint32_t t_cycle = 4*m_cycle;
@@ -68,6 +72,7 @@ void ppu_mode_2_oam_search(dmg* dmg){
             }
     }
     dmg->PPU.mode = 3;
+    update_stat_flags(dmg);
     return;
 }
 
@@ -77,6 +82,7 @@ void ppu_mode_3_pixel_transfer(dmg* dmg){
     if(dmg->PPU.ppu_cycle >= 252){
         scanline_rendering(dmg);
         dmg->PPU.mode = 0;
+        update_stat_flags(dmg);
     }
 }
 
@@ -185,6 +191,7 @@ void ppu_mode_0_hblank(dmg* dmg){
     if(dmg->PPU.ppu_cycle >= 456){
         dmg->PPU.ppu_cycle -=456;
         dmg->PPU.LY++;
+        update_stat_flags(dmg);
         if(dmg->PPU.LY >= 144){
             dmg->PPU.mode = 1;
             uint8_t if_reg = bus_read(dmg, 0xFF0F);
@@ -205,9 +212,32 @@ void ppu_mode_1_vblank(dmg* dmg){
     if (dmg->PPU.ppu_cycle >= 456){
         dmg->PPU.ppu_cycle -=456;
         dmg->PPU.LY++;
+        update_stat_flags(dmg);
         if (dmg->PPU.LY > 153){
             dmg->PPU.LY = 0;
             dmg->PPU.mode = 2;
         }
+    }
+}
+
+void update_stat_flags(dmg* dmg){
+    uint8_t stat = bus_read(dmg, 0xFF41);
+    uint8_t lyc = bus_read(dmg, 0xFF45);
+    uint8_t current_mode = dmg->PPU.mode & 0x03;
+
+    stat = (stat & ~0x03) | current_mode;
+
+    uint8_t lyc_match = (dmg->PPU.LY == lyc);
+    if(lyc_match) stat |= (1 << 2);
+    else stat &= ~(1 << 2);
+
+    stat |= 0x80;
+    bus_write(dmg, 0xFF41, stat);
+
+    uint8_t trigger = 0;
+    if (((stat & (1 << 3)) && (current_mode == 0)) || ((stat & (1 << 4)) && (current_mode == 1)) || ((stat & (1 << 5)) && (current_mode == 2)) || ((stat & (1 << 6)) && lyc_match)) trigger = 1;
+    if(trigger){
+        uint8_t if_reg = bus_read(dmg, 0xFF0F);
+        bus_write(dmg, 0xFF0F, if_reg | (1<<1));
     }
 }
