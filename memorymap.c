@@ -1,3 +1,4 @@
+#include "c_apu.h"
 #include "dmg.h"
 #include "memorymap.h"
 #include "ppu.h"
@@ -7,6 +8,9 @@ uint8_t bus_read(dmg* dmg, uint16_t addr){
 
     if (addr == 0xFF00){
         return joypad_read(dmg);
+    }
+    if (addr >= 0xFF10 && addr <= 0xFF3F) { //APU ADDR
+    return apu_read(addr);
     }
     if (addr == 0xFF04){
         return (dmg->CPU.sys_counter >> 8) & 0xFF;
@@ -53,11 +57,14 @@ void bus_write(dmg* dmg, uint16_t addr, uint8_t value){
     }
     //  MBC END
 
+    if (addr >= 0xFF10 && addr <= 0xFF3F) {  //APU ADDR
+    apu_write(addr, value);
+    return;
+    }
+
     if(addr >= 0xA000 && addr < 0xC000 && !dmg->MBC.ram_enabled) return;
 
     if(addr == 0xFF41){ //STAT UPDATE
-        uint8_t old_stat = bus_read(dmg, 0xFF41);
-        uint8_t new_stat = (value & 0x78) | (old_stat & 0x87);
         update_stat_flags(dmg);
     }
 

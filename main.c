@@ -2,6 +2,7 @@
 #include "render.h"
 #include "instructions.h"
 #include "ppu.h"
+#include "c_apu.h"
 
 int main(int argc, char *argv[]){
 
@@ -11,12 +12,28 @@ int main(int argc, char *argv[]){
     char* file_loc = "tetris.gb";
     int capped_fps = 1;
 
-
+    //  SDL INIT (RENDERING AND AUDIO)
 
     SDL_Window* window = open_window();
     SDL_Renderer* renderer = initiate_renderer(window);
     SDL_Event event;
 
+    SDL_InitSubSystem(SDL_INIT_AUDIO);
+    SDL_AudioSpec wanted;
+    SDL_zero(wanted);
+    wanted.freq = 44100;
+    wanted.format = AUDIO_S16SYS;
+    wanted.channels = 2;
+    wanted.samples = 1024;
+ 
+    SDL_AudioDeviceID audio_dev = SDL_OpenAudioDevice(NULL, 0, &wanted, NULL, 0);
+    if (audio_dev == 0) {
+        printf("Erreur Ouverture Audio SDL: %s\n", SDL_GetError());
+    }
+    int audio_started = 0;
+
+    apu_init(44100, audio_dev);
+    //  DMG INITIALIZATION
 
     dmg* dmg;
     dmg = initiate_dmg();
@@ -68,12 +85,14 @@ int main(int argc, char *argv[]){
                 else if (event.type == SDL_KEYUP) {
                     handle_key_event(dmg, event.key.keysym.sym, 0);
                 }
-                if (event.type == SDL_KEYUP && capped_fps == 0){
-                    capped_fps = 1;
+                if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_TAB){
+                    capped_fps = !capped_fps;
                 }
-                else if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_TAB){
-                    capped_fps = 0;
-                }
+            }
+            apu_end_frame(70224);
+            if(!audio_started && audio_dev != 0 && SDL_GetQueuedAudioSize(audio_dev) >= 8192){
+                SDL_PauseAudioDevice(audio_dev, 0);
+                audio_started = 1;
             }
             render_frame(renderer, texture, dmg->PPU.display);
             dmg->CPU.cycle -= 17556;
@@ -88,6 +107,10 @@ int main(int argc, char *argv[]){
     }
 
     free(dmg);
+
+    if (audio_dev != 0) {
+        SDL_CloseAudioDevice(audio_dev);
+    }
 
     SDL_DestroyTexture(texture);
     SDL_DestroyRenderer(renderer);
