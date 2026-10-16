@@ -34,15 +34,33 @@ void bus_write(dmg* dmg, uint16_t addr, uint8_t value){
             }
             update_mbc_banks(dmg);
         }
+        else if(dmg->MBC.mbc_type == 3){
+            if(addr < 0x2000)       dmg->MBC.ram_enabled = ((value & 0x0F) == 0x0A);
+            else if(addr < 0x4000){ dmg->MBC.rom_bank = value & 0x7F;
+                            if(dmg->MBC.rom_bank == 0) dmg->MBC.rom_bank = 1; }
+            else if(addr < 0x6000)  dmg->MBC.ram_bank = value;
+            // 0x6000-0x7FFF
+            update_mbc_banks(dmg);
+        }
+        else if(dmg->MBC.mbc_type == 5){
+            if(addr < 0x2000)       dmg->MBC.ram_enabled = ((value & 0x0F) == 0x0A);
+            else if(addr < 0x3000)  dmg->MBC.rom_bank = (dmg->MBC.rom_bank & 0x100) | value;
+            else if(addr < 0x4000)  dmg->MBC.rom_bank = (dmg->MBC.rom_bank & 0x0FF) | ((value & 1) << 8);
+            else if(addr < 0x6000)  dmg->MBC.ram_bank = value & 0x0F;
+            update_mbc_banks(dmg);
+}
         return;
     }
     //  MBC END
+
+    if(addr >= 0xA000 && addr < 0xC000 && !dmg->MBC.ram_enabled) return;
+
     if(addr == 0xFF41){ //STAT UPDATE
         uint8_t old_stat = bus_read(dmg, 0xFF41);
         uint8_t new_stat = (value & 0x78) | (old_stat & 0x87);
         update_stat_flags(dmg);
     }
-    
+
     if(addr == 0xFF45){  //LYC UPDATE
         dmg->memory_map[addr>>10][addr & 0x03FF] = value;
         update_stat_flags(dmg);
@@ -103,6 +121,31 @@ uint8_t joypad_read(dmg* dmg){
 
 void update_mbc_banks(dmg* dmg){
     uint8_t actual_rom_bank = dmg->MBC.rom_bank & 0x1F;
+
+    if(dmg->MBC.mbc_type == 5){
+        uint32_t off = ((uint32_t)dmg->MBC.rom_bank * 16 * 1024) % dmg->MBC.rom_size;
+        for(int i = 0; i < 16; i++) dmg->memory_map[16 + i] = &dmg->MBC.rom_buffer[off + i*1024];
+        for(int i = 0; i < 8; i++){
+            if(dmg->MBC.ram_enabled) dmg->memory_map[40 + i] = &dmg->MBC.ram_buffer[dmg->MBC.ram_bank * 8 * 1024 + i*1024];
+            else                     dmg->memory_map[40 + i] = dmg->MBC.dummy_ram;
+        }
+        return;
+    }
+
+    if(dmg->MBC.mbc_type == 3){
+        uint32_t bank = dmg->MBC.rom_bank & 0x7F;
+        if(bank == 0) bank = 1;
+        uint32_t off = (bank * 16 * 1024) % dmg->MBC.rom_size;
+        for(int i = 0; i < 16; i++) dmg->memory_map[16 + i] = &dmg->MBC.rom_buffer[off + i*1024];
+        for(int i = 0; i < 8; i++){
+            if(dmg->MBC.ram_enabled && dmg->MBC.ram_bank <= 3)
+                dmg->memory_map[40 + i] = &dmg->MBC.ram_buffer[dmg->MBC.ram_bank * 8 * 1024 + i*1024];
+            else
+                dmg->memory_map[40 + i] = dmg->MBC.dummy_ram;
+        }
+        return;
+    }
+    
     if(actual_rom_bank == 0) actual_rom_bank = 1;
     if(dmg->MBC.banking_mode == 0){
         actual_rom_bank = actual_rom_bank | (dmg->MBC.ram_bank << 5);
