@@ -16,5 +16,6 @@ void ppu_mode_1_vblank(dmg* dmg);
 void scanline_rendering(dmg* dmg);
 uint8_t get_pixel_color(dmg* dmg, uint8_t x, uint8_t y);
 void draw_sprite_scanline(dmg* dmg, dmg_sprite_t sprite);
+void update_stat_flags(dmg* dmg);
 
 #endif

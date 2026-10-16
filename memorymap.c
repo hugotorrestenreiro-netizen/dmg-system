@@ -1,5 +1,6 @@
 #include "dmg.h"
 #include "memorymap.h"
+#include "ppu.h"
 
 uint8_t bus_read(dmg* dmg, uint16_t addr){
     if (addr == 0xFF44) return dmg->PPU.LY;
@@ -36,7 +37,9 @@ void bus_write(dmg* dmg, uint16_t addr, uint8_t value){
         return;
     }
     //  MBC END
-
+    if(addr == 0xFF41 || addr == 0xFF45){
+        update_stat_flags(dmg);
+    }
     if(addr == 0xFF46){
         uint16_t source = value << 8;
         for(int i = 0; i < 160; i++){

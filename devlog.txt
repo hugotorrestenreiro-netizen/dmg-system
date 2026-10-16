@@ -239,3 +239,7 @@ de repasser desus car je pars du principe qu'il y a potentiellement encore une o
 2: modes
 
 3: implémentation
+
+registre STAT
+
+#MBC
