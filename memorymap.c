@@ -37,8 +37,16 @@ void bus_write(dmg* dmg, uint16_t addr, uint8_t value){
         return;
     }
     //  MBC END
-    if(addr == 0xFF41 || addr == 0xFF45){
+    if(addr == 0xFF41){ //STAT UPDATE
+        uint8_t old_stat = bus_read(dmg, 0xFF41);
+        uint8_t new_stat = (value & 0x78) | (old_stat & 0x87);
         update_stat_flags(dmg);
+    }
+    
+    if(addr == 0xFF45){  //LYC UPDATE
+        dmg->memory_map[addr>>10][addr & 0x03FF] = value;
+        update_stat_flags(dmg);
+        return;
     }
     if(addr == 0xFF46){
         uint16_t source = value << 8;

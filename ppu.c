@@ -191,7 +191,6 @@ void ppu_mode_0_hblank(dmg* dmg){
     if(dmg->PPU.ppu_cycle >= 456){
         dmg->PPU.ppu_cycle -=456;
         dmg->PPU.LY++;
-        update_stat_flags(dmg);
         if(dmg->PPU.LY >= 144){
             dmg->PPU.mode = 1;
             uint8_t if_reg = bus_read(dmg, 0xFF0F);
@@ -200,6 +199,7 @@ void ppu_mode_0_hblank(dmg* dmg){
         else{
             dmg->PPU.mode = 2; 
         }
+        update_stat_flags(dmg);
         return;
     }
     return;
@@ -232,12 +232,14 @@ void update_stat_flags(dmg* dmg){
     else stat &= ~(1 << 2);
 
     stat |= 0x80;
-    bus_write(dmg, 0xFF41, stat);
+    dmg->memory_map[0xFF41 >> 10][0xFF41 & 0x03FF] = stat;  //No bus_write -> Seg Fault due to stack overflow (because update_stat_flags is called in it.)
 
     uint8_t trigger = 0;
     if (((stat & (1 << 3)) && (current_mode == 0)) || ((stat & (1 << 4)) && (current_mode == 1)) || ((stat & (1 << 5)) && (current_mode == 2)) || ((stat & (1 << 6)) && lyc_match)) trigger = 1;
-    if(trigger){
+    if(trigger && dmg->PPU.stat_reg_signal == 0){
         uint8_t if_reg = bus_read(dmg, 0xFF0F);
         bus_write(dmg, 0xFF0F, if_reg | (1<<1));
     }
+    dmg->PPU.stat_reg_signal = trigger;
+    return;
 }
