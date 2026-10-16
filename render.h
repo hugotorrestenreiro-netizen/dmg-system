@@ -1,5 +1,5 @@
-#ifndef INSTRUCTIONS
-#define INSTRUCTIONS
+#ifndef RENDER_H
+#define RENDER_H
 
 #include <SDL2/SDL.h>
 #include "dmg.h"

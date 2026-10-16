@@ -44,7 +44,18 @@ typedef struct
     dmg_sprite_t selected_sprite[10];
 }ppu;
 
-
+typedef struct mbc
+{
+    uint8_t* rom_buffer;
+    uint32_t rom_size;
+    uint8_t ram_buffer[32 * 1024];
+    uint8_t mbc_type;
+    uint8_t ram_enabled;
+    uint8_t rom_bank;
+    uint8_t ram_bank;
+    uint8_t banking_mode;
+    uint8_t dummy_ram[1024];
+}mbc;
 
 typedef struct dmg
 {
@@ -53,6 +64,7 @@ typedef struct dmg
     uint8_t memory[0x10000];
     uint8_t* memory_map[64];
     uint8_t joypad_state;
+    mbc MBC;
 }dmg;
 
 typedef enum {
@@ -71,7 +83,7 @@ void set_reg8bit_index(dmg* dmg, uint8_t input, uint8_t value);
 uint16_t* reg16bit_index(dmg* dmg,uint8_t input);
 uint16_t reg16bit_mem_index(dmg* dmg,uint8_t input);
 dmg* initiate_dmg();
-uint8_t* load_rom(dmg* dmg, char* file_loc);
+void load_rom(dmg* dmg, char* file_loc);
 uint16_t* reg16stk_index(dmg* dmg, uint8_t input);
 void key_down(dmg* dmg, dmg_key_t key);
 void key_up(dmg* dmg, dmg_key_t key);

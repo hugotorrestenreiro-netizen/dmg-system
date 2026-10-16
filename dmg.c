@@ -79,10 +79,10 @@ void set_reg8bit_index(dmg* dmg, uint8_t input, uint8_t value){
 
 //  ROM LOADING
 
-uint8_t* load_rom(dmg* dmg, char* file_loc){
+void load_rom(dmg* dmg, char* file_loc){
     if(file_loc == NULL){
         printf("file location error");
-        return NULL;
+        return ;
     } 
     char* extension;
     extension = strrchr(file_loc , '.');
@@ -90,7 +90,7 @@ uint8_t* load_rom(dmg* dmg, char* file_loc){
         FILE* file = fopen(file_loc, "rb");
         if(file == NULL){
             printf("fopen error");
-            return NULL;
+            return ;
         }
         fseek(file, 0, SEEK_END);
         int size = ftell(file);
@@ -99,10 +99,26 @@ uint8_t* load_rom(dmg* dmg, char* file_loc){
         if(rom_buffer == NULL){
             fclose(file); 
             printf("rom_buffer malloc error");
-            return NULL;
+            return ;
         }
         fread(rom_buffer, 1, size, file);
         fclose(file);
+        dmg->MBC.rom_size = size;
+        for(int i = 0; i < sizeof(dmg->MBC.dummy_ram); i++){
+            dmg->MBC.dummy_ram[i] = 0xFF;
+        }
+        uint8_t mbc_game_type = rom_buffer[0x0147];
+        if(mbc_game_type >= 0x01 && mbc_game_type <= 0x03){
+            dmg->MBC.mbc_type = 1;
+        }
+        else{
+            dmg->MBC.mbc_type = 0;
+        }
+        dmg->MBC.rom_bank = 1;
+        dmg->MBC.ram_bank = 0;
+        dmg->MBC.ram_enabled = 0;
+        dmg->MBC.banking_mode = 0;
+
         for (int i = 0; i < 32; i++) {
         if (i * 1024 < size) {
             dmg->memory_map[i] = &rom_buffer[i * 1024];
@@ -111,9 +127,12 @@ uint8_t* load_rom(dmg* dmg, char* file_loc){
             dmg->memory_map[i] = &dmg->memory[i * 1024];
             }
         }
-        return rom_buffer;
+        dmg->MBC.rom_buffer = rom_buffer;
+        update_mbc_banks(dmg);
+
+        return;
     }
-    return NULL;
+    return;
 }
 
 //  JOYPAD

@@ -1,5 +1,5 @@
-#ifndef INSTRUCTIONS
-#define INSTRUCTIONS
+#ifndef PPU_H
+#define PPU_H
 
 #include "dmg.h"
 #include "memorymap.h"

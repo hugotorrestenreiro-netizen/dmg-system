@@ -14,9 +14,28 @@ uint8_t bus_read(dmg* dmg, uint16_t addr){
 }
 
 void bus_write(dmg* dmg, uint16_t addr, uint8_t value){
+
+    //  MBC START
     if(addr < 0x8000){
+        if(dmg->MBC.mbc_type == 1){
+            if(addr < 0x2000){
+                dmg->MBC.ram_enabled = ((value & 0x0F) == 0x0A);
+            }
+            else if (addr < 0x4000){
+                dmg->MBC.rom_bank = value & 0x1F;
+                if (dmg->MBC.rom_bank == 0) dmg->MBC.rom_bank = 1;
+            }
+            else if (addr < 0x6000){
+                dmg->MBC.ram_bank = value & 0x03;
+            }
+            else{ 
+                dmg->MBC.banking_mode = value & 0x01;
+            }
+            update_mbc_banks(dmg);
+        }
         return;
     }
+    //  MBC END
 
     if(addr == 0xFF46){
         uint16_t source = value << 8;
@@ -36,11 +55,6 @@ void bus_write(dmg* dmg, uint16_t addr, uint8_t value){
         return;
     }
 
-    if (addr == 0xFF02 && value == 0x81) {
-    uint8_t c = bus_read(dmg, 0xFF01);
-    printf("%c", c);
-    fflush(stdout);
-    }
     dmg->memory_map[addr>>10][addr & 0x03FF] = value;
     return;
 }
@@ -58,6 +72,8 @@ uint8_t check_cond(dmg* dmg, uint8_t cc){
     return (flag == n_bool);
 }
 
+//  JOYPAD
+
 uint8_t joypad_read(dmg* dmg){
     uint8_t joypad_val = dmg->memory[0xFF00];
     uint8_t state_dpad = dmg->joypad_state & 0x0F;
@@ -70,4 +86,34 @@ uint8_t joypad_read(dmg* dmg){
         low_nibble = low_nibble & ~(state_buttons);
     }
     return 0xC0 | (joypad_val & 0x30) | (low_nibble & 0x0F);
+}
+
+//  MBC
+
+void update_mbc_banks(dmg* dmg){
+    uint8_t actual_rom_bank = dmg->MBC.rom_bank & 0x1F;
+    if(actual_rom_bank == 0) actual_rom_bank = 1;
+    if(dmg->MBC.banking_mode == 0){
+        actual_rom_bank = actual_rom_bank | (dmg->MBC.ram_bank << 5);
+    }
+    uint32_t rom_offset = (actual_rom_bank * 16 * 1024) % dmg->MBC.rom_size;
+
+    for(int i = 0; i <16; i++){
+        dmg->memory_map[16 + i] = &dmg->MBC.rom_buffer[rom_offset + (i*1024)];
+    }
+
+    if(!dmg->MBC.ram_enabled){
+        for(int i = 0; i < 8 ; i++){
+            dmg->memory_map[40+i] = dmg->MBC.dummy_ram;
+        }
+    }
+    else{
+        uint8_t actual_ram_bank;
+        if(dmg->MBC.banking_mode == 1) actual_ram_bank = dmg->MBC.ram_bank & 0x03;
+        else actual_ram_bank = 0;
+        uint32_t ram_offset = (actual_ram_bank * 8 * 1024);
+        for (int i = 0; i < 8; i++){
+            dmg->memory_map[40+i] = &dmg->MBC.ram_buffer[ram_offset + (i * 1024)];
+        }
+    }
 }
