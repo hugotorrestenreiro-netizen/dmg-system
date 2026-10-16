@@ -33,7 +33,7 @@ blargg_err_t Basic_Gb_Apu::set_sample_rate( long rate )
 {
 	apu.output( buf.center(), buf.left(), buf.right() );
 	buf.clock_rate( 4194304 );
-	return buf.set_sample_rate( rate );
+	return buf.set_sample_rate( rate, 250 );
 }
 
 void Basic_Gb_Apu::write_register( gb_addr_t addr, int data )

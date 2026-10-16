@@ -1,4 +1,5 @@
 #include "ppu.h"
+#include "c_apu.h"
 
 void ppu_step(dmg* dmg, uint32_t m_cycle){
 
