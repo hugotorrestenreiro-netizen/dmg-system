@@ -27,9 +27,9 @@ int main(int argc, char *argv[]){
 
     SDL_Texture* texture = create_ppu_texture(renderer);
 
-    uint8_t* rom_buffer = load_rom(dmg, file_loc);
+    load_rom(dmg, file_loc);
 
-    if (rom_buffer == NULL) {
+    if (dmg->MBC.rom_buffer == NULL) {
         printf("Rom loading error");
         return 1;
     }
