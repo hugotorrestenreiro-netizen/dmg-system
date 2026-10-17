@@ -1,10 +1,10 @@
 #include "render.h"
 
 static const uint32_t palette[4] = {
-    0x9BBC0FFF, // 0 : Blanc / Vert très clair
-    0x8BAC0FFF, // 1 : Vert clair
-    0x306230FF, // 2 : Vert foncé
-    0x0F380FFF  // 3 : Noir / Vert très foncé
+    0x809810FF, // 0 : Vert olive mat (fond doux)
+    0x486810FF, // 1 : Vert moyen (bien démarqué du fond)
+    0x204010FF, // 2 : Vert sombre
+    0x081808FF  // 3 : Noir vert très profond
 };
 
 SDL_Window* open_window(){
