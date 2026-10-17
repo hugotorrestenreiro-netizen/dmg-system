@@ -33,7 +33,7 @@ SDL_LIBS_WIN   = -L$(SDL2_DIR)/lib -lmingw32 -lSDL2main -lSDL2 -mconsole
 
 CFLAGS_WIN   = -Wall -Wextra -O2 $(SDL_CFLAGS_WIN)
 CXXFLAGS_WIN = -Wall -Wextra -O2 -IGb_Snd_Emu-main -IGb_Snd_Emu-main/gb_apu $(SDL_CFLAGS_WIN)
-LDFLAGS_WIN  = $(SDL_LIBS_WIN) -lstdc++ -static-libgcc -static-libstdc++
+LDFLAGS_WIN  = $(SDL_LIBS_WIN) -static-libgcc -static-libstdc++ -Wl,-Bstatic -lstdc++ -lpthread -Wl,-Bdynamic
 
 
 all: $(TARGET_LINUX)
