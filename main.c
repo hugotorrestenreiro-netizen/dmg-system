@@ -127,10 +127,13 @@ int main(int argc, char *argv[]){
             dmg->CPU.cycle -= 17556;
             //dmg->PPU.cycle -= 17556*4;
 
-            frame_time = SDL_GetTicks() - start;
-
-            if(frame_time < 16 && capped_fps){
-                SDL_Delay(16 - frame_time);
+            if (capped_fps) {
+                if (audio_started) {
+                    while (SDL_GetQueuedAudioSize(audio_dev) > 8192) SDL_Delay(1);  // Audio dictates fps
+                } else {
+                    start = SDL_GetTicks();
+                    frame_time = SDL_GetTicks() - start;
+                }
             }
         }
     }
