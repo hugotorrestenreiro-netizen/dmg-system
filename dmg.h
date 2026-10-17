@@ -66,6 +66,7 @@ typedef struct dmg
     uint8_t* memory_map[64];
     uint8_t joypad_state;
     mbc MBC;
+    char save_loc[256];
 }dmg;
 
 typedef enum {
