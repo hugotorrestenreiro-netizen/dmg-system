@@ -89,7 +89,7 @@ void load_rom(dmg* dmg, char* file_loc){
     if(extension && strcmp(extension, ".gb") == 0){
         FILE* file = fopen(file_loc, "rb");
         if(file == NULL){
-            printf("fopen error");
+            printf("fopen error\n");
             return ;
         }
         fseek(file, 0, SEEK_END);
@@ -98,11 +98,14 @@ void load_rom(dmg* dmg, char* file_loc){
         uint8_t* rom_buffer = malloc(size);
         if(rom_buffer == NULL){
             fclose(file); 
-            printf("rom_buffer malloc error");
+            printf("rom_buffer malloc error\n");
             return ;
         }
         fread(rom_buffer, 1, size, file);
         fclose(file);
+
+        //  MBC MODE FINDER
+
         dmg->MBC.rom_size = size;
         for(int i = 0; i < sizeof(dmg->MBC.dummy_ram); i++){
             dmg->MBC.dummy_ram[i] = 0xFF;
@@ -137,7 +140,31 @@ void load_rom(dmg* dmg, char* file_loc){
         dmg->MBC.rom_buffer = rom_buffer;
         update_mbc_banks(dmg);
 
-        return;
+        //  SAVE FINDER/ LOADING
+
+        char save_path[256];
+
+        char* base_name = strrchr(file_loc, '/');
+        if(base_name != NULL) base_name = base_name + 1 ;
+        else base_name = file_loc;
+
+        char* dot = strrchr(base_name, '.');
+
+        if (dot != NULL) {
+            snprintf(save_path, sizeof(save_path), "roms/%.*s.sav", (int)(dot - base_name), base_name);
+        } else {
+            snprintf(save_path, sizeof(save_path), "roms/%s.sav", base_name);
+        }
+
+        strcpy(dmg->save_loc, save_path);
+
+        FILE* save_file = fopen(save_path, "rb");
+        if(save_file != NULL){
+            fread(dmg->MBC.ram_buffer, 1, 128*1024 , save_file);
+            fclose(save_file);
+            return;
+        }
+        else return;
     }
     return;
 }

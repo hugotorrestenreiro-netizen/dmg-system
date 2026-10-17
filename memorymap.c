@@ -21,72 +21,83 @@ uint8_t bus_read(dmg* dmg, uint16_t addr){
 void bus_write(dmg* dmg, uint16_t addr, uint8_t value){
 
     //  MBC START
-    if(addr < 0x8000){
-        if(dmg->MBC.mbc_type == 1){
-            if(addr < 0x2000){
-                dmg->MBC.ram_enabled = ((value & 0x0F) == 0x0A);
+    if (addr < 0x8000) {
+
+        if (addr < 0x2000) {
+            uint8_t new_state = ((value & 0x0F) == 0x0A);
+
+            if (dmg->MBC.ram_enabled == 1 && new_state == 0) {
+                save_sram(dmg);
             }
-            else if (addr < 0x4000){
+
+            dmg->MBC.ram_enabled = new_state;
+            return;
+        }
+
+        if (dmg->MBC.mbc_type == 1) {
+            if (addr < 0x4000) {
                 dmg->MBC.rom_bank = value & 0x1F;
                 if (dmg->MBC.rom_bank == 0) dmg->MBC.rom_bank = 1;
             }
-            else if (addr < 0x6000){
+            else if (addr < 0x6000) {
                 dmg->MBC.ram_bank = value & 0x03;
             }
-            else{ 
+            else { 
                 dmg->MBC.banking_mode = value & 0x01;
             }
             update_mbc_banks(dmg);
         }
-        else if(dmg->MBC.mbc_type == 3){
-            if(addr < 0x2000)       dmg->MBC.ram_enabled = ((value & 0x0F) == 0x0A);
-            else if(addr < 0x4000){ dmg->MBC.rom_bank = value & 0x7F;
-                            if(dmg->MBC.rom_bank == 0) dmg->MBC.rom_bank = 1; }
-            else if(addr < 0x6000)  dmg->MBC.ram_bank = value;
-            // 0x6000-0x7FFF
+        else if (dmg->MBC.mbc_type == 3) {
+            if (addr < 0x4000) { 
+                dmg->MBC.rom_bank = value & 0x7F;
+                if (dmg->MBC.rom_bank == 0) dmg->MBC.rom_bank = 1; 
+            }
+            else if (addr < 0x6000) {
+                dmg->MBC.ram_bank = value;
+            }
             update_mbc_banks(dmg);
         }
-        else if(dmg->MBC.mbc_type == 5){
-            if(addr < 0x2000)       dmg->MBC.ram_enabled = ((value & 0x0F) == 0x0A);
-            else if(addr < 0x3000)  dmg->MBC.rom_bank = (dmg->MBC.rom_bank & 0x100) | value;
-            else if(addr < 0x4000)  dmg->MBC.rom_bank = (dmg->MBC.rom_bank & 0x0FF) | ((value & 1) << 8);
-            else if(addr < 0x6000)  dmg->MBC.ram_bank = value & 0x0F;
+        else if (dmg->MBC.mbc_type == 5) {
+            if (addr < 0x3000)      dmg->MBC.rom_bank = (dmg->MBC.rom_bank & 0x100) | value;
+            else if (addr < 0x4000) dmg->MBC.rom_bank = (dmg->MBC.rom_bank & 0x0FF) | ((value & 1) << 8);
+            else if (addr < 0x6000) dmg->MBC.ram_bank = value & 0x0F;
             update_mbc_banks(dmg);
-}
+        }
         return;
     }
     //  MBC END
 
-    if (addr >= 0xFF10 && addr <= 0xFF3F) {  //APU ADDR
-    apu_write(addr, value);
-    return;
+    if (addr >= 0xFF10 && addr <= 0xFF3F) {  // APU ADDR
+        apu_write(addr, value);
+        return;
     }
 
-    if(addr >= 0xA000 && addr < 0xC000 && !dmg->MBC.ram_enabled) return;
+    if (addr >= 0xA000 && addr < 0xC000 && !dmg->MBC.ram_enabled) return;
 
-    if(addr == 0xFF41){ //STAT UPDATE
+    if (addr == 0xFF41) { // STAT UPDATE
         update_stat_flags(dmg);
     }
 
-    if(addr == 0xFF45){  //LYC UPDATE
+    if (addr == 0xFF45) {  // LYC UPDATE
         dmg->memory_map[addr>>10][addr & 0x03FF] = value;
         update_stat_flags(dmg);
         return;
     }
-    if(addr == 0xFF46){
+
+    if (addr == 0xFF46) {
         uint16_t source = value << 8;
-        for(int i = 0; i < 160; i++){
+        for (int i = 0; i < 160; i++) {
             uint8_t byte = bus_read(dmg, source + i);
             bus_write(dmg, 0xFE00 + i, byte);
         }
     }
 
-    if(addr == 0xFF04){
+    if (addr == 0xFF04) {
         dmg->CPU.sys_counter = 0;
         return;
     }
 
-    if (addr == 0xFF00){
+    if (addr == 0xFF00) {
         dmg->memory[0xFF00] = value & 0x30;
         return;
     }
@@ -176,5 +187,15 @@ void update_mbc_banks(dmg* dmg){
         for (int i = 0; i < 8; i++){
             dmg->memory_map[40+i] = &dmg->MBC.ram_buffer[ram_offset + (i * 1024)];
         }
+    }
+}
+
+//  SAVE
+
+void save_sram(dmg* dmg){
+    FILE* save_file = fopen(dmg->save_loc, "wb");
+    if (save_file != NULL) {
+        fwrite(dmg->MBC.ram_buffer, 1, 128 * 1024, save_file);
+        fclose(save_file);
     }
 }

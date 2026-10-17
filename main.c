@@ -1,3 +1,5 @@
+#include <dirent.h>
+#include <string.h>
 #include "dmg.h"
 #include "render.h"
 #include "instructions.h"
@@ -9,7 +11,34 @@ int main(int argc, char *argv[]){
     (void)argc;
     (void)argv;
 
-    char* file_loc = "tetris.gb";
+    //  FIND ROM DIRECTORY
+
+    DIR* rom_directory = opendir("roms");
+    if(rom_directory == NULL){
+        printf("Could not find 'roms' directory.\n");
+        return 1;
+    }
+    char* extension;
+    char file_loc_array[256] = "";
+    struct dirent* file;
+
+    while((file = readdir(rom_directory)) != NULL){
+        extension = strrchr(file->d_name , '.');
+        if(extension && strcmp(extension, ".gb") == 0){
+            snprintf(file_loc_array, sizeof(file_loc_array), "roms/%s", file->d_name);
+            closedir(rom_directory);
+            break;
+        }
+    }
+
+    if (file_loc_array[0] == '\0') {
+    printf("No rom found\n");
+    closedir(rom_directory);
+    return 1;
+    }
+
+    char* file_loc = file_loc_array;
+
     int capped_fps = 1;
 
     //  SDL INIT (RENDERING AND AUDIO)
