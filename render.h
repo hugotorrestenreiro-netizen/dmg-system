@@ -19,5 +19,6 @@ void handle_key_event(dmg* dmg, SDL_Keycode key, uint8_t state);
 typedef void (*state_dispatch_t)(dmg* dmg, dmg_key_t key);
 SDL_Texture* create_ppu_texture(SDL_Renderer* renderer);
 void render_frame(SDL_Renderer* renderer, SDL_Texture* texture, uint8_t display[]);
+void palette_change(uint8_t index);
 
 #endif

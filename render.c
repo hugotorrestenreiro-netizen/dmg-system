@@ -1,6 +1,6 @@
 #include "render.h"
 
-static const uint32_t palette[4] = {
+static uint32_t palette[4] = {
     0x809810FF, // 0 : Vert olive mat (fond doux)
     0x486810FF, // 1 : Vert moyen (bien démarqué du fond)
     0x204010FF, // 2 : Vert sombre
@@ -111,6 +111,38 @@ void handle_key_event(dmg* dmg, SDL_Keycode key, uint8_t state) {
     if (state <= 1) {
         state_dispatch_t state_dispatch[2] = {key_up, key_down};
         state_dispatch[state](dmg, key_input);
+    }
+    return;
+}
+
+void palette_change(uint8_t index){
+    switch (index)
+    {
+    case 1: //Normal
+        palette[0]= 0x809810FF;
+        palette[1]= 0x486810FF;
+        palette[2]= 0x204010FF;
+        palette[3]= 0x081808FF;
+        break;
+    
+    case 2: //Purple
+        palette[0]= 0xE0C0E8FF;
+        palette[1]= 0x9B6B9EFF;
+        palette[2]= 0x522B56FF;
+        palette[3]= 0x1C0F1EFF;
+        break;
+    case 3: //Red
+        palette[0]= 0xF4B6B6FF;
+        palette[1]= 0xC45B5BFF;
+        palette[2]= 0x6B2323FF;
+        palette[3]= 0x210A0AFF;
+        break;
+    case 4: //Blue
+        palette[0]= 0x8EA8C3FF;
+        palette[1]= 0x4A6984FF;
+        palette[2]= 0x1D2E42FF;
+        palette[3]= 0x080E17FF;
+        break;
     }
     return;
 }

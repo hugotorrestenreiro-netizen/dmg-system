@@ -117,6 +117,18 @@ int main(int argc, char *argv[]){
                 if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_TAB){
                     capped_fps = !capped_fps;
                 }
+                if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_F1){
+                    palette_change(1);
+                }
+                if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_F2){
+                    palette_change(2);
+                }
+                if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_F3){
+                    palette_change(3);
+                }
+                if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_F4){
+                    palette_change(4);
+                }
             }
             apu_end_frame(70224);
             if(!audio_started && audio_dev != 0 && SDL_GetQueuedAudioSize(audio_dev) >= 8192){
