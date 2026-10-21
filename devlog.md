@@ -138,13 +138,13 @@ Maintenant les bases posées dans render.c et main.c, je vais concentrer tous me
 Une condition est tout simplement le fait de vérifier l'état d'un des flags. Petite fonction intermédiaire que j'ai écrite, j'explique juste parceque j'ai trouvé des solutions super propres, jolies et élégantes. Dans un opcode (xx yyy zzz), il peut arriver qu'une condition soit mise en paramètre, il y en a 4 possibles : nz, z, nc et c (le n devant nz et nc veut tout simplement dire not(donc not c et not z)). Le paramètre dans l'opcode sera placé sur les deux derniers bit y, donc cc tel que: xx ycc zzz. Les ingénieurs de l'époque de la création de ce système ont trouvé une méthode pour que ces index de condition soient propres et pratiques. Si on les met dans l'ordre nz, z, nc et c; et que l'on regarde les paramètres qui les "pointent", on a nz = 00, z = 01, nc = 10, c = 11. En voyant ceci vous pourriez vous dire que cela semble tout à fait banal, cependant la façon dont ceci est faite est INCROYABLE pour les gens comme moi qui essaient d'avoir le moins de branchements possibles, je m'explique, au lieu d'utiliser un if pour reconnaitre la bonne condition, on peut décomposer les 2bits qui les "caractérisent". Le premier bit (en partant de la gauche), donne le flag correspondant à la condition , si c'est 0, ce sera z (qui englobe z et nz) et si c'est 1 ce sera c (idem). L'autre bit quand à lui permettra de voir si l'on veut la codition tel quel ou son inverse (n), si ce bit est égal à 0, on aura la "version" not du flag et si c'est 1 on vérifie le flag en lui même.
 
 #tableau d'instructions (DE LA PLUS HAUTE IMPORTANCE)
+
 Bon, j'ai expliqué la façon dont les opcodes sont formés précédement, je vais maintenant expliquer comment je les ai indexés, globalement, on peut schématiser ça par un arbre:
 EXEMPLE DU BLOC X = 0:
-
-
+![alt text](./docs/instruction_table_dark.png)
 Fait avec markmap ("markmap.js.org").
 
-Ici vous pouvez voir 
+Ici vous pouvez voir un arbre, chaque branche et chaque intersection est, dans le code, traduit par une fonction de "dispatch", qui sers à aiguiller vers une prochaine fonction jusqu'à arriver à la fonction correspondant à l'opcode actuel. (J'ai fait ça avec des tableaux (const) qui permettent au code de récupérer uniquement les parties souhaitées : xx, yyy ou zzz afin de les utiliser en index dans ses mêmes tableaux.)
 
 Par simple manque d'inspiration, et après un long cassage de crâne j'estime que certaines fonctions restent meilleures avec if (notament ici l'instruction qui m'embête est un RET), en fait utiliser des ifs dans des cas où il y a une issue très probable baisse drastiquement le risque de pipeline flush, donc dans certains cas il est plus propre et plus optimal d'utiliser un if. Je vais notament en utiliser sur le ppu.
 
@@ -153,7 +153,19 @@ Par simple manque d'inspiration, et après un long cassage de crâne j'estime qu
 J'ai le grand honneur d'annoncer que les instructions ainsi que leur cablage sur le tableau d'instruction est définitivement terminé, je suppose tout de même que je risque de repasser desus car je pars du principe qu'il y a potentiellement encore une ou deux petites fautes (notament sur les retour de cycle d'horloge ou quoi).
 
 #joypad
-//à écrire (utilisation de buffer puis d'un reader)
+
+Ici petite partie pour parler de comment les touches sont gérées en mémoire (un peu technique mais ça ira, vous verrez), alors l'état des touches sont gérées au sein d'un seul octet présent en mémoire (adresse $FF00), le format de cet octet est relativement simple :
+
+- le premier bit (bit 0) correspond à la touche A et à la touche directionelle Droite.
+- le deuxieme bit (bit 1) correspond à la touche B et à la touche directionelle Gauche.
+- le troisième bit (bit 2) correspond à la touche START et à la touche directionelle Haut.
+- le quatrième bit (bit 3) correspond à la touche SELECT et à la touche directionelle Bas.
+
+Vous me direz ici que pour l'instant c'est incohérent et étrange, la façon dont c'est organisé: "Mais si on appuie sur B, ça va aussi activer "Gauche" !" c'est pour ça que les bits
+4 et 5 existent:
+
+Si le cinquième bit (bit 4) est allumé, les quatre premiers bits seront interprétés en tant que touche directionnelle (haut, bas, gauche ,droite). Alors que si le sixième bit est allumé, les quatre premiers bits seront interprétés en tant que boutons (a, b ,start, select).
+
 
 #boucle main
 //structure globale (accumulateur etc)
