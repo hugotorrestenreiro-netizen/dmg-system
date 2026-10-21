@@ -213,6 +213,8 @@ Vous me direz ici que pour l'instant c'est incohérent et étrange, la façon do
 
 Si le cinquième bit (bit 4) est allumé, les quatre premiers bits seront interprétés en tant que touche directionnelle (haut, bas, gauche ,droite). Alors que si le sixième bit est allumé, les quatre premiers bits seront interprétés en tant que boutons (a, b ,start, select).
 
+> Note: Attention:dans la rédaction de ce paragraphe j'ai laissé une petite confusion, les bits passent à 0 pour "s'allumer", ils sont à 1 quand ils sont "éteints".
+
 ### boucle main
 
 //structure globale (accumulateur etc)  
