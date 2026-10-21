@@ -1,3 +1,6 @@
+//UNCONTINUED. GO TO devlog.md
+
+
 By Hugo TORRES TENREIRO, étudiant en deuxieme année de Licence en INFORMATIQUE FONDAMENTALE (2026/2027) dans l'université de Bordeaux.
 //For English speakers, I might translate this devlog one day (or not).
 //Les crédits sont à la fin.
