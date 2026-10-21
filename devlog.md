@@ -1,0 +1,185 @@
+By Hugo TORRES TENREIRO, étudiant en deuxieme année de Licence en INFORMATIQUE FONDAMENTALE (2026/2027) dans l'université de Bordeaux.
+//For English speakers, I might translate this devlog one day (or not).
+//Les crédits sont à la fin.
+
+//Historiques de projets avant cela: emu Chip-8, simu planètes 2D.(consultables sur mon github : "https://github.com/hugotorrestenreiro-netizen")
+//Ce document necessite un minimum de connaissance en C et en manipulation binaire (filtres, décalage de bit, etc...), ce sont des connaissances relativement
+accessibles et pas trop compliquées.
+
+##01/10/2026
+
+#"Préambule" (pas sûr du titre mais je laisse comme ça pour l'instant):
+Voici mon "Journal de bord" pour ce périple qu'est la mise en place de mon émulateur DMG codé en C.J'ai décidé de tenir ce devlog afin d'aider de futurs dev qui aimeraient réutiliser mon code, pour toute personne cherchant une explication relativement pédagogique du projet (pour apprendre des choses (on adore ça)), ou alors pour moi-même à l'avenir si l'envie me viens de rire du manque d'experience de mon moi passé (ou tout simplement pour suivre l'avancée de ma souffrance/raisonnement etc...). Je commence ceci après avoir entamé la conception de cet émulateur, même si je suis encore au début. J'expliquerai ici donc mes pensées, mes raisonnements, les corrections de ces mêmes raisonnements ainsi que tous mes idées afin d'architecturer ce projet au mieux. Pour ce projet je me suis aidé des PanDocs ("https://gbdev.io/pandocs/About.html" travail de documentation EXCEPTIONNEL (allez voir c'est le feu)), également la table d'opcodes de Megan Sullivan ("https://meganesulli.com/blog/game-boy-opcodes/"(INCROYABLE)) ou une autre table d'opcode équivalente("https://izik1.github.io/gbops/" (Tout aussi génial mais un peu moins esthétique à mon humble avis)).
+
+Je mettrai à jour certaines anciennes sections avec des petites updates sous la forme: "(upd "date")" .
+
+#Architecture de base:
+
+Alors pour gérer l'architecture et la gestion des données j'ai décidé d'utiliser une grande structure "globale" que j'ai appelé dmg, dans celle ci on retrouve 3 choses :
+
+Note: cpu c'est le processeur (calculs etc) et ppu la puce graphique (affichage)
+
+- la structure cpu contenant les registres (16 bits) et deux tableau qui me servent de "carte de registre" (un pour les registres 8bit et un autre pour les 16bits), pour obtenir les registres 8 bit (car ici cpu ne stock que des registres 16bit), je découpe littéralement les registres en deux pour par exemple passer de BC (reg16bit) à B (reg8bit) ou C (reg8bit), je préfère garder ce fonctionnement pour que le fonctionnement de l'émulateur ne soit pas détruit (à cause de l'utilisation de "union") sur des systèmes avec des Endiannesses différents.(upd 03/102026) Ajout d'un entier : cycles, qui stock un compteur de cycles cpu.
+
+- la structure ppu qui pour l'instant ne contient que le tableau display qui contient les données, vous l'aurez deviné, de l'écran (attention faire la différence entre l'écran de la machine émulée et la fenêtre qui s'affiche lorsque vous lancez la rom (pas la même chose: le tableau display est l'écran qui reçoit directement ces données du cpu, et la fenêtre qui s'affiche quand à elle analyse ce fameux tableau display et avec une bibliothèque(ensemble de fonctions(ici SDL2), "traduit" l'affichage dans un language (en gros pour discuter avec la carte graphique) et afficher sur nos super pc modernes ces données. ))). J'ajouterai des éléments en plus au fur et à  mesure du développement car pour l'instant le fonctionnement du ppu me terrifie.
+
+- le tableau memory[] qui contient l'ensemble des données en mémoire de cet interpreteur (interpreteur est un autre mot pour dire emulateur).
+
+Note: SDL2 est la bibliothèque utilisée ici pour pouvoir créer une fenêtre, afficher des choses etc.
+
+Maintenant je vais expliquer les différents fichiers présents pour l'instant:
+- dmg.c toutes les fonctions qui ont à voir de près ou de loin avec le fonctionnement du processeur (partie fect decode execute par exemple)
+- instructions.c ici je code tous les opcodes (les petites instructions assembleur utilisées à l'époque par le processeur émulé), j'expliquerai par la suite comment j'ai rendu
+ça bien PROPRE (à mon humble avis).
+- main.c ici je gèrerai la boucle qui permet à l'émulateur de prendre vie (affichage SDL, cycle d'horloge du cpu et du ppu, etc).
+
+Pour l'instant très simple et risque de fonctionner comme ça mais il y a toujours de futurs potentiels candidats:
+- ppu.c gérer les cyles d'affichage sur display etc (risque de rester dans dmg.c, mais je suis pas trop sûr parceque ça risque de faire un trop gros fichier).
+- memorymap.c ici uniquement le "bus de données" pour gérer la façon dont les données sont stockées (ici modele Von Neumann (faites vos recherches parceque flemme d'expliquer ça c'est trop long)).Je risque également de faire tout ceci dans dmg.c mais encore une fois la même histoire, le fichier risque d'être trop "lourd" (je veux rendre ça propre, beau et lisible).
+
+#instructions
+
+Ici on parle de décisions d'architecture assez pointues donc j'ai préféré faire un petit résumé de connaissances en expliquant d'abord l'instruction et le concept de pipeline flush et de prédiction d'embranchements (partie un peu plus sérieuse même si toujours avec ton léger car c'est juste du jargon un peu technique).
+
+Résumé de connaissances:
+
+C'est quoi une instruction ? (pour ceux qui ne savent pas)
+Alors, les instructions un morceau qui peut paraître terrifiant à première vue mais, ne vous inquietez pas, une fois la logique comprise tout roule comme sur des roulettes (encore faut-il la comprendre). Une instruction est comme son nom l'indique une instruction qui sera donnée au cpu, cette instruction a donc un but, qui peut aller de la  simple addition au déplacement en mémoire de données. Elles ont chacune une valeur hexadécimale (type 0xYY) différente.
+
+Dans l'architecture dmg, les ingénieurs à l'origine du processeur (ici le Z80 à l'origine) ont fait en sorte que les instructions, une fois en binaire est une espèce de "préfixe" ou de "suffixe", par exemple toute instruction demandant chargement de données d'un registre 8bit à un autre sera de la forme : 01 rrr r'r'r', avec rrr et r'r'r' deux variable de 3bit qui permettent de "viser" l'un des registre (comme un index dans un tableau si on veut). De manière plus générale on aura cette forme: XX YYY ZZZ, XX sera une "catégorie", si au sein de cette catégorie il y a plus d'une instruction: on doit réussir à trouver un autre moyen de l'identifier, que ce soit avec ZZZ ou YYY, on peut alors cibler au sein de cette catégorie une instruction précise.
+
+Pipeline flush:
+
+Maintenant ceci expliqué nous pouvons aller au coeur du sujet. Alors, au sein d'un processeur il y a une notion clée qui est le pipeline, il s'agit d'une rangée de N valeurs toutes "en file indienne" qui subisse des manipulations par le processeur, dans un processeur classique on retrouve 3 étapes, fetch decode et execute. Maintenant, je vais rendre un sujet abstrait qui est le pipeline flush assez facile à comprendre en usant de ma superbe capacité à vulgariser: le processeur adore prévoir à l'avance, l'illustration même de cela est le fait que comme dit plus haut, il gère plusieurs instructions dans ce "pipeline" en même temps, donc il gère en même temps que l'instruction qui arrive à un temps t, deux instructions qui pour l'une arrivera a t+1 et l'autre à t+2 (on a à nouveau ce principe de fil d'attente, de fil indienne), cependant si  au sein du programme, on utilise un "if" ce qui se déroulera sera incertain dépendant donc du "outcome" du if, le processeur incapable de prévoir précisément peut alors se tromper d'instructions à faire à t+1 et t+2, si il se trompe, toute la file d'attente passe à la trappe et on perd 2 instructions qui partent dans le néant (elles ne servent plus à  rien car le processeur a mal prédit la suite), ce concept de prédiction de ce qu'il se déroulera plus tard par le processeur s'appelle la prédiction de branchements. Ces branchements sont créés par des ifs donc, et finissent par faire perdre des ressources au processeur (comme si il y avait une micro fuite sur un moteur qui ralentirait une voiture en gros).
+
+On en vient maintenant à l'architecture, j'ai donc décidé, de reprendre le format XX YYY ZZZ pour manipuler mes instructions et en gros faire des instructions "générales" pour qu'une seule fonction réponde au fonctionnement de plusieurs instructions assembleur, par exemple la fonction LD_r8r8, car dans le vrai matériel d'origine, toutes les combinaisons d'assignation de valeur de registre sont présentes (A->B, B->A, C->A, B->C, etc), donc beaucoup de travail pour pas grand chose, ici LD_r8r8 simplifie la chose en lisant les paramètres qui ici sont 01 rrr r'r'r' (ici on ne pourra pas retrouver uniquement les registres avec ces valeurs, c'est pourquoi j'ai fait une fonction intermédiaire qui permet d'interpréter ces rrr et r'r'r' (reg8bit_index())) où on peut piocher directement les registres demandés. Lorsque l'interpréteur doit trouver une instruction par rapport à sa valeur (héxadécimale/ binaire), dans mon dernier émulateur j'ai utiliser des if, donc des branchements, et oui le diable incarné pour que la performance (prédiction de branchements et pipeline flush si vous avez bien suivi), donc j'ai décidé d'indexer les instructions au sein de tableaux, pour que le processeur puisse prédire tranquillement où il va.
+
+ATTENTION: La perte de pipeline flush avec les ifs est uniquement liée au processeur hôte (donc l'objectif est que votre pc fasse mieux tourner l'émulateur), c'est à dire au processeur de votre ordinateur, ici aucun pipeline n'est géré, c'est les instruction unes par unes quoi qu'il arrive.
+
+Conclusion: Je chasse les ifs dans les zones qui tournent à haute fréquence, pour que vous puissiez même utiliser cet interpréteur sur une PATATE.
+
+Voilà pour ce bloc un peu technique, la compréhension globale de la machine ne necessite pas de maitriser ces concepts, uniquement le concept d'instruction est important pour bien comprendre le tout.
+
+##02/10/2026
+
+Bon à partir de maintenant, vu que j'ai rattrapé tout le début de ma conception (même si j'ai déjà prévu quoi faire au fur et à mesure de la conception de cet emulateur), et mon architecture déjà posée, nous allons ici avoir un format ou j'attaque chaque choses sur lequelles je tombes, qui me posent soucis, quelles solutions ont été trouvées et comment.
+
+#mise à jour de flags lors d'opérations
+
+Lors de l'implémentation de mes instructions je suis tombé sur ma première opération (add hl r16), ici j'ai commencé à utiliser quelque chose qui me faisait vraiment peur au début,
+les flags, dans l'architecture dmg on en trouve 4 :
+- z le "ZERO FLAG"
+- n le "SUBSTRACTION FLAG"
+- h le "HALF CARRY FLAG"
+- c le "CARRY FLAG"
+Alors pour faire simple, le carry flag passe à 1 lorsque un entier (non signé (unsigned)) dépasse sa valeur maximale (en 8bit il s'agit de 255, par exemple) et repasse à 0. Vous imaginez bien donc que lors d'opérations mathématiques, cette limite peut être franchie et qu'il faudra alors mettre à jour ces petits flags (je ne développerai pas sur l'utilité de
+chaque flags, l'important est de comprendre l'idée qu'il y a derrière le flag), ces flags en mémoire sont rangés dans le registre AF du processeur, plus précisément dans son octet de poids faible (ici 0x00FF). Donc les flags sont dans le registre 8bit F qui est donc sous cette forme: znhc0000 (ici ducoup c'est des bits(les 4 derniers bits seront toujours égaux à 0)). La solution que j'ai utilisée pour mettre à jour notament le flag c lors d'une addition est notamment de mettre le résultat de l'addition dans une autre variable de taille supérieure et extraire le bit d'après (pour un résultat qui à la base doit être en 16bit, je récupère le résultat dans une variable 32bit et j'extrait le bit 16 (le 17 ème ducoup car on commence à compter à partir de 0)), donc cela permet d'observer facilement si l'addition dépasse la valeure maximale d'un entier non signé de 16bit. Donc après ça, il n'y a plus qu'à réinjecter les bit aux bonnes position du regitre AF.
+
+(upd du ##03/10/2026)
+
+#flags-suite
+
+Alors je fais une petite appartée pour expliquer comment j'ai trouvé une bonne solution pour mettre à jour les flags que je n'ai pas encore abordé (en gros tout sauf le flag carry (c)),
+sans les if, j'ai trouvé une solution pour chacuns: 
+- h, le half carry, marche exactement comme carry sauf que là je découpe une valeur de 8bit en extrayant ces 4 derniers bits dans une variable à part (entier non signé 8bit), et je vérifie après l'opération si le bit 4 s'est allumé (vraiment même logique que le flag c).
+- n, très simple s'allume quand il y a soustraction, sinon on l'éteint
+- z, s'allume lorsque la valeur vaut 0 ,ici j'utilise l'opérateur booléen "!", sur le résultat (z = !res), donc si le résultat est différent de 0, il passe à 0 mais si c'est 0 il passe à 1.
+
+Note: Quand je parle du concepte d' "allumer" un flag, je parle juste du fait de le passer de 0 à 1 (il s'agit d'un bit donc c'est les deux seules valeurs qu'il peut prendre).
+
+J'ai également mis en place une fonctions intermédiaire update_flags qui permet de mettre à jour les flags de manière propre, fluide, jolie, magnifique et élégante (j'adore ça).
+
+#bus mémoire
+
+Alors... Petit soucis de conception... Jusqu'à maintenant l'objectif était dans l'ordre de gérer les instructions, puis le comportement du cpu, utiliser les rom de test (BLARG), puis me charger du bus (avec le MBC(j'expliquerai de quoi il s'agit plus tard)) et du ppu, mais le problème est que les instructions manipulent des données en mémoire et que si  je les fait avant de m'occuper du bus, je devrais repasser sur chacune des fonctions qui interagissent avec la mémoire. Je me charge donc maintenant en priorité du bus mémoire pour avoir un code modulaire et m'occuper du MBC uniquement en implémentant le système à un bus "linéaire" que je vais mettre en place mainteant (en faisant comme ça, le MBC sera une implémentation propre au code déjà effectué, tout sera 100% compatible (en gros je gagne BEAUCOUP de temps à faire ça comme ça)).
+
+-memorymap.c rajouté :D
+
+Ok pour intégrer ça j'ai fait des trucs un peu techniques, seulement 2 fonctions et 1 tableau (très simple mais très efficace), en gros j'ai créé des fonctions intermédiaires qui permettent d'accéder à des endroits dans la mémoire à travers un tableau d'adresses intermédiaire (memory_map[], que j'ai ajouté à la structure dmg), qui est découpé par tranche de 1ko par 1ko pour retrouver précisément l'adresse recherchée (Pour que plus tard chaque index puisse pointer par exemple sur l'adresse de la banque cible dans les données de la  rom chargée en prévision du MBC). Donc pour l'instant le ficher memorymap.c ne contient pas grand chose car c'est surtout un moyen de gagner du temps à l'avenir, au lieu de  repasser sur chaque instruction qui agit en mémoire, j'aurai juste à changer cet intermédiaire.
+
+fonctions:
+- uint8_t bus_read(dmg* dmg, uint16_t addr)
+- void bus_write(dmg* dmg, uint16_t addr, value)
+
+Les instructions déjà implémentées utilisent maintenant les fonctions bus_read et bus_write pour interagir avec la mémoire.
+
+##03/10/2026
+
+#cycle d'horloge
+
+Je viens de me rendre compte dans mon code que pour l'instant j'ai complètement oublié l'implémentation de la prise en charge du compteur de cycles cpu (qui sera extrêmement important plus tard pour synchroniser le cpu et le ppu (un cycle cpu = 4 cycles ppu)). Mes instructions retourneront maintenant le nombre de cycles effectuées lors de leur exécution (ce qui me permettra plus tard d'uniquement faire la partie execute en 1 ligne (m_cycle = "fonction d'exectute";    dmg->CPU.cycle += m_cycle;)).
+
+##06/10/2026
+
+Alors, plein de belles choses se sont passées depuis ma dernière mise au point, tout d'abord je vais commencer par le principal:
+
+#render et main
+
+J'ai tout simplement récupéré le code que j'avais fait pour le chip 8 en retirant tout ce qui a un lien avec le chip 8, j'ai donc une structure bien solide mais pas grand chose, je devrais donc me charger du pixel buffer  (le truc dont j'avais parlé, le tableau contenant l'image qui sera affichée dans votre fenêtre par la suite), le fonctionnement du cpu et son cadençage par rapport au ppu, etc.
+
+#instruction daa 
+Alors attaquons une instruction qui m'a causé un méchant mal de crâne (ne vous inquietez une fois compris c'est simple), je préfère avoir une section dédiée à cette instruction car elle m'a demandé de comprendre son concepte pendant au moins une bonne heure de recherches.
+Que fait daa ? 
+Il s'agit tout simplement d'une correction à la fin d'un calcul pour transformer une valeur  de format binaire de base en format BCD.
+
+Qu'est ce qu'un BCD ? 
+
+Anciennement, sur certaines machines, un format de nombre a vu le jour, le BCD, il s'agit d'une valeur retranscrise en héxadécimale qui doit être au format suivant (ici exemple sur 1octet (8bit)): 0xYZ, avec Y et Z deux entiers allant de 0 à 9, et 0xYZ égal à la valeur décimale YZ, par exemple en BCD 0x42 = 42. La majeure différence avec l'héxadécimal de base (et donc le binaire), est l'absence des valeurs allant de 10 à 15 (A, B, C, D, E et F), ce sont donc des valeurs qu'ont peut considérer comme "interdites". Pour transformer une valeur binaire basique en BCD, la solution est d'incrémenter chaque nibles de 6 (car il y a 6 valeurs interdites(10 à 15)), on fini donc avec une valeur au bon format.
+
+(Je me suis abstenu d'aborder le sujet des flags qui sont en lien avec le fonctionnement de cette instruction, car une fois le principe compris le reste n'est que la partie technique assez avancée, c'est à dire la mise en place etc (si besoin il y a des commentaires sur le code directement))
+
+#mise à jour sur l'avancée de manière générale
+Maintenant les bases posées dans render.c et main.c, je vais concentrer tous mes efforts sur instructions.c pour pouvoir déjà faire tourner le cpu (sans retour graphique), car je prévois spécifiquement de faire mon tableau d'instructions uniquement à partir du moment où tout les instructions seront prêtes afin d'indexer le tableau d'une bonne fois et d'être bien structuré (le faire à moitié à l'aveugle ce serai jouer avec le feu).
+ 
+##07/10/2026
+
+#check conditions
+
+Une condition est tout simplement le fait de vérifier l'état d'un des flags. Petite fonction intermédiaire que j'ai écrite, j'explique juste parceque j'ai trouvé des solutions super propres, jolies et élégantes. Dans un opcode (xx yyy zzz), il peut arriver qu'une condition soit mise en paramètre, il y en a 4 possibles : nz, z, nc et c (le n devant nz et nc veut tout simplement dire not(donc not c et not z)). Le paramètre dans l'opcode sera placé sur les deux derniers bit y, donc cc tel que: xx ycc zzz. Les ingénieurs de l'époque de la création de ce système ont trouvé une méthode pour que ces index de condition soient propres et pratiques. Si on les met dans l'ordre nz, z, nc et c; et que l'on regarde les paramètres qui les "pointent", on a nz = 00, z = 01, nc = 10, c = 11. En voyant ceci vous pourriez vous dire que cela semble tout à fait banal, cependant la façon dont ceci est faite est INCROYABLE pour les gens comme moi qui essaient d'avoir le moins de branchements possibles, je m'explique, au lieu d'utiliser un if pour reconnaitre la bonne condition, on peut décomposer les 2bits qui les "caractérisent". Le premier bit (en partant de la gauche), donne le flag correspondant à la condition , si c'est 0, ce sera z (qui englobe z et nz) et si c'est 1 ce sera c (idem). L'autre bit quand à lui permettra de voir si l'on veut la codition tel quel ou son inverse (n), si ce bit est égal à 0, on aura la "version" not du flag et si c'est 1 on vérifie le flag en lui même.
+
+#tableau d'instructions (DE LA PLUS HAUTE IMPORTANCE)
+Bon, j'ai expliqué la façon dont les opcodes sont formés précédement, je vais maintenant expliquer comment je les ai indexés, globalement, on peut schématiser ça par un arbre:
+EXEMPLE DU BLOC X = 0:
+
+
+Fait avec markmap ("markmap.js.org").
+
+Ici vous pouvez voir 
+
+Par simple manque d'inspiration, et après un long cassage de crâne j'estime que certaines fonctions restent meilleures avec if (notament ici l'instruction qui m'embête est un RET), en fait utiliser des ifs dans des cas où il y a une issue très probable baisse drastiquement le risque de pipeline flush, donc dans certains cas il est plus propre et plus optimal d'utiliser un if. Je vais notament en utiliser sur le ppu.
+
+##11/10/2026
+
+J'ai le grand honneur d'annoncer que les instructions ainsi que leur cablage sur le tableau d'instruction est définitivement terminé, je suppose tout de même que je risque de repasser desus car je pars du principe qu'il y a potentiellement encore une ou deux petites fautes (notament sur les retour de cycle d'horloge ou quoi).
+
+#joypad
+//à écrire (utilisation de buffer puis d'un reader)
+
+#boucle main
+//structure globale (accumulateur etc)
+
+##14/10/2026
+
+#ppu  (Pas de Fifo c'est bcp trop compliqué (ça me donne mal au crâne), je préfère faire un affichage ligne par ligne plus simple à implémenter)
+
+1: Fonctionnement global
+
+2: modes
+
+3: implémentation
+
+registre STAT
+
+##15/10/2026
+
+#MBC1
+
+##16/10/2026
+
+#APU
+
+Pour l'apu (gestion de sons), je vais faire appel à la librairie de blargg Gb_apu, car m'investir dans de la gestion de signaux ne me ferait que perdre du temps, ce n'est pas un élément qui va développer mon niveau d'ingénieurerie système, ce qui est l'objectif principal de ce projet. Pour la partie implémentation je me suis également aidé d'une IA car, je ne maitrise pas encore le C++, et donc je ne suis absolument pas capable d'implémenter Gb_Snd_Emu-main de moi-même.
+
+#MBC3
+
+#MBC5
