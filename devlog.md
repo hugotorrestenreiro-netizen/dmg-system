@@ -48,7 +48,7 @@ Ici on parle de décisions d'architecture assez pointues donc j'ai préféré fa
 
 Alors, les instructions un morceau qui peut paraître terrifiant à première vue mais, ne vous inquietez pas, une fois la logique comprise tout roule comme sur des roulettes (encore faut-il la comprendre). Une instruction est comme son nom l'indique une instruction qui sera donnée au cpu, cette instruction a donc un but, qui peut aller de la  simple addition au déplacement en mémoire de données. Elles ont chacune une valeur hexadécimale (type 0xYY) différente.
 
-Dans l'architecture dmg, les ingénieurs à l'origine du processeur (ici le Z80 à l'origine) ont fait en sorte que les instructions, une fois en binaire est une espèce de "préfixe" ou de "suffixe", par exemple toute instruction demandant chargement de données d'un registre 8bit à un autre sera de la forme : 01 rrr r'r'r', avec rrr et r'r'r' deux variable de 3bit qui permettent de "viser" l'un des registre (comme un index dans un tableau si on veut). De manière plus générale on aura cette forme: `XX YYY ZZZ`, XX sera une "catégorie", si au sein de cette catégorie il y a plus d'une instruction: on doit réussir à trouver un autre moyen de l'identifier, que ce soit avec ZZZ ou YYY, on peut alors cibler au sein de cette catégorie une instruction précise.
+Dans l'architecture dmg, les ingénieurs à l'origine du processeur (ici le Sharp LR35902 à l'origine) ont fait en sorte que les instructions, une fois en binaire est une espèce de "préfixe" ou de "suffixe", par exemple toute instruction demandant chargement de données d'un registre 8bit à un autre sera de la forme : 01 rrr r'r'r', avec rrr et r'r'r' deux variable de 3bit qui permettent de "viser" l'un des registre (comme un index dans un tableau si on veut). De manière plus générale on aura cette forme: `XX YYY ZZZ`, XX sera une "catégorie", si au sein de cette catégorie il y a plus d'une instruction: on doit réussir à trouver un autre moyen de l'identifier, que ce soit avec ZZZ ou YYY, on peut alors cibler au sein de cette catégorie une instruction précise.
 
 ```c
 uint8_t x = (opcode & 0xC0) >> 6;   // XX
@@ -60,7 +60,7 @@ uint8_t z = (opcode & 0x07);        // ZZZ
 
 Maintenant ceci expliqué nous pouvons aller au coeur du sujet. Alors, au sein d'un processeur il y a une notion clée qui est le pipeline, il s'agit d'une rangée de N valeurs toutes "en file indienne" qui subisse des manipulations par le processeur, dans un processeur classique on retrouve 3 étapes, fetch decode et execute. Maintenant, je vais rendre un sujet abstrait qui est le pipeline flush assez facile à comprendre en usant de ma superbe capacité à vulgariser: le processeur adore prévoir à l'avance, l'illustration même de cela est le fait que comme dit plus haut, il gère plusieurs instructions dans ce "pipeline" en même temps, donc il gère en même temps que l'instruction qui arrive à un temps t, deux instructions qui pour l'une arrivera a t+1 et l'autre à t+2 (on a à nouveau ce principe de fil d'attente, de fil indienne), cependant si  au sein du programme, on utilise un "if" ce qui se déroulera sera incertain dépendant donc du "outcome" du if, le processeur incapable de prévoir précisément peut alors se tromper d'instructions à faire à t+1 et t+2, si il se trompe, toute la file d'attente passe à la trappe et on perd 2 instructions qui partent dans le néant (elles ne servent plus à  rien car le processeur a mal prédit la suite), ce concept de prédiction de ce qu'il se déroulera plus tard par le processeur s'appelle la prédiction de branchements. Ces branchements sont créés par des ifs donc, et finissent par faire perdre des ressources au processeur (comme si il y avait une micro fuite sur un moteur qui ralentirait une voiture en gros).
 
-On en vient maintenant à l'architecture, j'ai donc décidé, de reprendre le format `XX YYY ZZZ` pour manipuler mes instructions et en gros faire des instructions "générales" pour qu'une seule fonction réponde au fonctionnement de plusieurs instructions assembleur, par exemple la fonction `LD_r8r8`, car dans le vrai matériel d'origine, toutes les combinaisons d'assignation de valeur de registre sont présentes (A->B, B->A, C->A, B->C, etc), donc beaucoup de travail pour pas grand chose, ici `LD_r8r8` simplifie la chose en lisant les paramètres qui ici sont 01 rrr r'r'r' (ici on ne pourra pas retrouver uniquement les registres avec ces valeurs, c'est pourquoi j'ai fait une fonction intermédiaire qui permet d'interpréter ces rrr et r'r'r' (`reg8bit_index()`)) où on peut piocher directement les registres demandés. Lorsque l'interpréteur doit trouver une instruction par rapport à sa valeur (héxadécimale/ binaire), dans mon dernier émulateur j'ai utiliser des if, donc des branchements, et oui le diable incarné pour que la performance (prédiction de branchements et pipeline flush si vous avez bien suivi), donc j'ai décidé d'indexer les instructions au sein de tableaux, pour que le processeur puisse prédire tranquillement où il va.
+On en vient maintenant à l'architecture, j'ai donc décidé, de reprendre le format `XX YYY ZZZ` pour manipuler mes instructions et en gros faire des instructions "générales" pour qu'une seule fonction réponde au fonctionnement de plusieurs instructions assembleur, par exemple la fonction `LD_r8r8`, car dans le vrai matériel d'origine, toutes les combinaisons d'assignation de valeur de registre sont présentes (A->B, B->A, C->A, B->C, etc), donc beaucoup de travail pour pas grand chose, ici `LD_r8r8` simplifie la chose en lisant les paramètres qui ici sont 01 rrr r'r'r' (ici on ne pourra pas retrouver uniquement les registres avec ces valeurs, c'est pourquoi j'ai fait une fonction intermédiaire qui permet d'interpréter ces rrr et r'r'r' (`reg8bit_index()`)) où on peut piocher directement les registres demandés. Lorsque l'interpréteur doit trouver une instruction par rapport à sa valeur (héxadécimale/ binaire), dans mon dernier émulateur j'ai utiliser des if, donc des branchements, et oui le diable incarné pour que la performance (prédiction de branchements et pipeline flush si vous avez bien suivi), donc j'ai décidé d'indexer les instructions au sein de tableaux, pour que le processeur puisse prédire tranquillement (du moins j'éspère gagner en performance en faisant cela car ça reste plus compliqué (un appel par table est aussi un branchement), mais dans tous les cas ça sera plus propre dans le code) où il va.
 
 > **ATTENTION:** La perte de pipeline flush avec les ifs est uniquement liée au processeur hôte (donc l'objectif est que votre pc fasse mieux tourner l'émulateur), c'est à dire au processeur de votre ordinateur, ici aucun pipeline n'est géré, c'est les instruction unes par unes quoi qu'il arrive.
 
@@ -106,7 +106,7 @@ uint8_t res = val + 1;
 uint8_t z = !res;   // res = 0 -> z = 1, sinon z = 0
 ```
 
-> Note: Quand je parle du concepte d' "allumer" un flag, je parle juste du fait de le passer de 0 à 1 (il s'agit d'un bit donc c'est les deux seules valeurs qu'il peut prendre).
+> Note: Quand je parle du concept d' "allumer" un flag, je parle juste du fait de le passer de 0 à 1 (il s'agit d'un bit donc c'est les deux seules valeurs qu'il peut prendre).
 
 J'ai également mis en place une fonctions intermédiaire `update_flags` qui permet de mettre à jour les flags de manière propre, fluide, jolie, magnifique et élégante (j'adore ça).
 
@@ -129,7 +129,7 @@ Les instructions déjà implémentées utilisent maintenant les fonctions `bus_r
 
 ### cycle d'horloge
 
-Je viens de me rendre compte dans mon code que pour l'instant j'ai complètement oublié l'implémentation de la prise en charge du compteur de cycles cpu (qui sera extrêmement important plus tard pour synchroniser le cpu et le ppu (un cycle cpu = 4 cycles ppu)). Mes instructions retourneront maintenant le nombre de cycles effectuées lors de leur exécution (ce qui me permettra plus tard d'uniquement faire la partie execute en 1 ligne (m_cycle = "fonction d'exectute";    dmg->CPU.cycle += m_cycle;)).
+Je viens de me rendre compte dans mon code que pour l'instant j'ai complètement oublié l'implémentation de la prise en charge du compteur de cycles cpu (qui sera extrêmement important plus tard pour synchroniser le cpu et le ppu (un cycle cpu = 4 cycles ppu (un cycle cpu est aussi appelé un m-cycle))). Mes instructions retourneront maintenant le nombre de cycles effectuées lors de leur exécution (ce qui me permettra plus tard d'uniquement faire la partie execute en 1 ligne (m_cycle = "fonction d'exectute";    dmg->CPU.cycle += m_cycle;)).
 
 ## 06/10/2026
 
@@ -141,7 +141,7 @@ J'ai tout simplement récupéré le code que j'avais fait pour le chip 8 en reti
 
 ### instruction daa 
 
-Alors attaquons une instruction qui m'a causé un méchant mal de crâne (ne vous inquietez une fois compris c'est simple), je préfère avoir une section dédiée à cette instruction car elle m'a demandé de comprendre son concepte pendant au moins une bonne heure de recherches.
+Alors attaquons une instruction qui m'a causé un méchant mal de crâne (ne vous inquietez une fois compris c'est simple), je préfère avoir une section dédiée à cette instruction car elle m'a demandé de comprendre son concept pendant au moins une bonne heure de recherches.
 
 **Que fait daa ?**
 
@@ -152,6 +152,8 @@ Il s'agit tout simplement d'une correction à la fin d'un calcul pour transforme
 Anciennement, sur certaines machines, un format de nombre a vu le jour, le BCD, il s'agit d'une valeur retranscrise en héxadécimale qui doit être au format suivant (ici exemple sur 1octet (8bit)): 0xYZ, avec Y et Z deux entiers allant de 0 à 9, et 0xYZ égal à la valeur décimale YZ, par exemple en BCD 0x42 = 42. La majeure différence avec l'héxadécimal de base (et donc le binaire), est l'absence des valeurs allant de 10 à 15 (A, B, C, D, E et F), ce sont donc des valeurs qu'ont peut considérer comme "interdites". Pour transformer une valeur binaire basique en BCD, la solution est d'incrémenter chaque nibles de 6 (car il y a 6 valeurs interdites(10 à 15)), on fini donc avec une valeur au bon format.
 
 (Je me suis abstenu d'aborder le sujet des flags qui sont en lien avec le fonctionnement de cette instruction, car une fois le principe compris le reste n'est que la partie technique assez avancée, c'est à dire la mise en place etc (si besoin il y a des commentaires sur le code directement))
+
+> Note: Petite confusion ici, le DAA corrige le résultat d'un opération sur des nombres DEJA EN BCD, elle ne convertit pas une valeur binaire quelconque.
 
 ### mise à jour sur l'avancée de manière générale
 
@@ -214,15 +216,17 @@ Vous me direz ici que pour l'instant c'est incohérent et étrange, la façon do
 
 Si le cinquième bit (bit 4) est allumé, les quatre premiers bits seront interprétés en tant que touche directionnelle (haut, bas, gauche ,droite). Alors que si le sixième bit est allumé, les quatre premiers bits seront interprétés en tant que boutons (a, b ,start, select).
 
-> Note: Attention:dans la rédaction de ce paragraphe j'ai laissé une petite confusion, les bits passent à 0 pour "s'allumer", ils sont à 1 quand ils sont "éteints".
+> Note: Dans la rédaction de ce paragraphe j'ai laissé une petite confusion, les bits passent à 0 pour "s'allumer", ils sont à 1 quand ils sont "éteints".
 
 ### boucle main
 
-//structure globale (accumulateur etc)  
+Pour faire simple, dans ma boucle while principale, je gère les évènements et mise à jour de textures d'SDL2, pour ce qui est du taux de rafraichissement (fps), pour faire simple, chaque frame de la gameboy dure 17556 cycles cpu (aussi appelés m-cycles), il faut d'abord que j'aborde un sujet, pour que le programme soit retranscrit de manière fidèle, il faut qu'il tourne exactement à la même vitesse que la machine de base (j'ai pû notamment observer des problèmes surtout au niveau de l'apu, ou des craquements étaients entendus, lorsque je n'avais pas encore le bon taux de rafraichissement), pour que le taux de rafraichissement soit exactement celui de la console originale, au lieu de faire un SDL_Delay de 16ms à chaque frames, et d'ainsi d'atteindre environ 62.5 fps, j'ai décidé de faire en sorte que le moteur sonore (donc l'apu qui ici a été fait par Blargg) soit le maître du tempo, en envoyant des "paquets" de musique jusqu'à un certain palier. Bien évidemment, quand le logiciel ne fait aucun son, le programme est candencé à 59.7fps par défaut.
 
 ## 14/10/2026
 
 ### ppu  (Pas de Fifo c'est bcp trop compliqué (ça me donne mal au crâne), je préfère faire un affichage ligne par ligne plus simple à implémenter)
+
+//à rediger :
 
 1: Fonctionnement global
 
@@ -236,12 +240,27 @@ registre STAT
 
 ### MBC1
 
+Assez simple une fois que vous avez compris le concept de memory_map[] décrit plus haut, lorsque le programme le demande, on interchange la banque de l'adresse $4000 à $7FFF avec une autre afin que le système ait accès à plus que 32KiB de données. Comme vous l'aurez compris vu que memory_map[], aiguille les données dans bus_read et bus_write, on change tout simplement les adresses de la page memory_map[16] à memory_map[31].
+
 ## 16/10/2026
 
 ### APU
 
-Pour l'apu (gestion de sons), je vais faire appel à la librairie de blargg Gb_apu, car m'investir dans de la gestion de signaux ne me ferait que perdre du temps, ce n'est pas un élément qui va développer mon niveau d'ingénieurerie système, ce qui est l'objectif principal de ce projet. Pour la partie implémentation je me suis également aidé d'une IA car, je ne maitrise pas encore le C++, et donc je ne suis absolument pas capable d'implémenter Gb_Snd_Emu-main de moi-même.
+Pour l'apu (gestion de sons), je vais faire appel à la librairie de blargg Gb_apu, car m'investir dans de la gestion de signaux ne me ferait que perdre du temps, ce n'est pas un élément qui va développer mon niveau d'ingénierie système, ce qui est l'objectif principal de ce projet. Pour la partie implémentation je me suis également aidé d'une IA car, je ne maitrise pas encore le C++, et donc je ne suis absolument pas capable d'implémenter Gb_Snd_Emu-main de moi-même.
 
 ### MBC3
 
+Le fonctionnement global du mbc3 ressemble au mbc1 sauf qu'il y a des banques en plus. Le programme gère ici aussi le coulissage des banques lui même au travers d'inputs reçues à certaines adresses, que j'interprète lorsque l'on essaie d'atteindre ces adresses avec le bus.
+
+> Note: Je n'ai pas implémenté à ce jour la "clock", c'est à dire l'horloge à temps réel qui est normalement une spécification supplémentaire par rapport au MBC1. Les programmes utilisant cette fonctionnalité ne planteront pas, le temps sera uniquement "figé", dans certains cas on vous demandera au relancement de votre programme de reparamétrer la date et l'heure.
+
 ### MBC5
+
+Fonctionnement globalement identique au MBC3, mais avec plus de banques, et sans l'horloge interne.
+
+
+## CREDITS
+
+APU: https://github.com/blarggs-audio-libraries/Gb_Snd_Emu
+Pandocs: https://gbdev.io/pandocs/Specifications.html
+Megan Sullivan's Gameboy Instruction Set: https://meganesulli.com/blog/game-boy-opcodes/
